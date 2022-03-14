@@ -19,18 +19,13 @@ EOF
 	exit 1
 }
 
-[ "$1" ] || {
-	echo 'missing args [$1 /path/to/model]'
-	exit 1
-}
-
 initangles "$1" 'base'
 # draw thread
 (
 	while :
 	do
 		# reset new state (shell is jank for this)
-		# TODO: remove the subshell? xargs isn't working for this
+		# TODO: remove the subshell? xargs doesn't like newlines
 		eval $(cat "$TMPFILE")
 		draw "$1"
 		sleep $FRAMETIME
