@@ -1,15 +1,30 @@
 MODEL FORMAT
-TODO: not clear at all lol, honestly just rewrite the whole thing lol
-TODO: animations? like animated hair/jiggle physics?
+------------
+Documentation for working with asciituber models
 
-FILE TREE
-model root:i
-	EMOTE (def. idle)
-		TYPE (eg. base)
-			/ANGLE (eg. upLft)
+File Structure:
+---------------
+The root contains
+- mirrorlist: a file telling the program which layers are symmetrical and should be mirrored, see "Mirrorlist:" for more info
+- $EMOTE/   : not fully implemented yet, only "idle" is read
+- - $LAYER/ : each layer to be drawn, see "Layers:" for more info
+- - -       : anything deeper depends on the layer, see "Layers:"
 
-TODO: map file to map dirs to special types and define draw order
-TYPE       DRAW ORDER
+Mirrorlist:
+-----------
+A simple DSL to tell the mirror script which layers (see "Layers:") should be mirrored. Each line should contain just the name of a layer to mirror. eg:
+<< EOF
+base
+eyebrowl
+eyebrowr
+EOF
+The mirror script will take all the left side angles, reverse them, and use them as the right side angles. As such, it WILL overwrite any right side angles. Make sure anything you put in this file should actually be fully symmetrical!
+
+Layers:
+-------
+TODO: allow for extra layers to be inserted
+Layers with special handling:
+NAME       DRAW ORDER
 - base     - 0
 - eyel     - 1
 - eyer     - 2
@@ -17,7 +32,12 @@ TYPE       DRAW ORDER
 - eyebrowr - 4
 - mouth    - 5
 - hair     - 6
+TODO: "Layers:" is unfinished
 
+
+--------------------------------------------------------------------------------
+the rest of this file hasn't been rewritten yet
+--------------------------------------------------------------------------------
 TODO: map file to map the default emote and emotes to cases (eg. wide eyes)
 EMOTE
 emote handling
@@ -131,3 +151,5 @@ LAYERNUMBER: a number, higher numbers are drawn later, 0-9
 - Whitespace leaves what's already on the screen alone and is not coloured
 - Explicitly coloured whitespace is possible by using a layer where fg=bg
   and any character OTHER than whitespace will appear as coloured whitespace
+
+# vim: wrap

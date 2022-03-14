@@ -4,25 +4,26 @@ Ascii art VTubing software
 Renders a VTuber model, in (mostly) POSIX compliant shell
 
 Features:
+---------
 - Full text attribute (colours, bold, italics, etc.) support
 - Simple, easy to modify to suit your needs with a little bit of shell knowledge
 - Mostly POSIX compliant, there's a some ${var::} and some read -n and probably some others in here still
 
 Simple Usage:
+-------------
 Send VRM data to localhost:3940 (the port can be changed at the top of ./asciituber), then run ./asciituber giving a model as an argument. Any extra usage information can be found by reading the scripts. Use an 80x24 terminal, any other sizes need manual adjustment currently.
 
 Models:
+-------
 Example models are in ./models, they are free to use as a base if you want to. Documentation of the format is in ./MODEL_FORMAT (it's pretty badly written, inspect the example models for more up to date info).
 
 Scripts:
+--------
 - ./asciituber   : reads vrm data from a port and draws the model
 - ./framecycle   : manually program a loop of frames, helps when making models to see how motion looks
 - ./drawlib      : sourced internally to actually draw the model
 - ./genposnumbers: add a dummy file header to the text files, was used for migration to a new format, useless now
 - ./genbaseright : generates mirrored copies of symmetrical elements
 
-
-What about Windows support?
-I don't use windows so I can't help much, but look into WSL (https://docs.microsoft.com/en-us/windows/wsl/).
 
 # vim: wrap

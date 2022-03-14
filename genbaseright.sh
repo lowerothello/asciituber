@@ -162,17 +162,17 @@ genelse() { # [$1 type]
 	done
 }
 # eyes
-geneye() { # [$1 hosteye] [$2 targeteye]
+geneye() { # [$1 hosteye] [$2 targeteye] [$3 hostangles] [$4 targetangles]
 	for vs in $eyestate
 	do
 		[ -d "$e/$1/$vs" ] || continue
 		for vi in $eyevariant
 		do
 			# flip the names if necessary
-			li="$(echo "$left" | lineindex "$vi")"
+			li="$(echo "$3" | lineindex "$vi")"
 			[ "$li" ] && {
-				vil="$(echo "$left" | line "$li")"
-				vir="$(echo "$right" | line $li)"
+				vil="$(echo "$3" | line "$li")"
+				vir="$(echo "$4" | line $li)"
 			} || {
 				vil="$vi"
 				vir="$vi"
@@ -181,10 +181,10 @@ geneye() { # [$1 hosteye] [$2 targeteye]
 			do
 				# flip the names if necessary
 				a="$(echo "$all" | line "$i")"
-				li="$(echo "$left" | lineindex "$a")"
+				li="$(echo "3" | lineindex "$a")"
 				[ "$li" ] && {
-					l="$(echo "$left" | line "$li")"
-					r="$(echo "$right" | line $li)"
+					l="$(echo "$3" | line "$li")"
+					r="$(echo "$4" | line $li)"
 					# nameflip=1
 				} || {
 					l="$a"
@@ -219,8 +219,8 @@ geneye() { # [$1 hosteye] [$2 targeteye]
 }
 genwrapper() { # [$1 type to gen]
 	case "$1" in
-		eyel) geneye eyel eyer ;;
-		eyer) : ;; # eyel mirrors over to eyer, so mirroring eyer is redundant
+		eyel) geneye eyel eyer "$left" "$right" ;;
+		eyer) geneye eyer eyel "$right" "$left" ;;
 		*)    genelse "$1" ;;
 	esac
 }
@@ -233,7 +233,7 @@ do
 		do
 			genwrapper "$d"
 		done < "$1/mirrorlist"
-	} || { # else mirror everything and warn
+	} || { # else exit and call it a success
 		echo "missing mirrorlist, mirroring nothing!"
 		exit 0
 	}
