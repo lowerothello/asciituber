@@ -1,0 +1,26 @@
+I
+O
+Blink_L
+Blink_R
+EYEBROW_ANGRY
+EYEBROW_SORROW
+TONGUE_OUT
+
+- LeftUpperLeg
+- RightUpperLeg
+- LeftLowerLeg
+- RightLowerLeg
+- LeftFoot
+- RightFoot
+- Spine
+- Chest
+Head
+- LeftUpperArm
+- RightUpperArm
+- LeftLowerArm
+- RightLowerArm
+- LeftHand
+- RightHand
+LeftEye
+RightEye
+root

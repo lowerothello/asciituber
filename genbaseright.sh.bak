@@ -1,0 +1,219 @@
+#/bin/sh
+# Gen right facing bases by flipping the left facing ones
+# Build for generating the test model, not super useful
+# in production unless your model is completely symmetrical
+
+[ "$1" ] || {
+	echo 'missing argument: [$1 /path/to/model]'
+	exit 1
+}
+
+# get a line out of a multiline file
+line() { # [$1 line] [3< multiline file]
+	count=0
+	while IFS= read -r line
+	do
+		count=$((count + 1))
+		[ $count = "$1" ] && {
+			echo "$line"
+			break
+		}
+	done
+}
+# check if a line is present in a multiline file
+lineexists() { # [$1 str] [3< multiline file]
+	
+}
+
+# ANGLES
+all="idle
+up
+dn
+lftS
+lft
+rghtS
+rght
+upLftS
+upLft
+upRghtS
+upRght
+dnLftS
+dnLft
+dnRghtS
+dnRght
+tltLft
+tltLftUp
+tltLftDn
+tltLftLftS
+tltLftLft
+tltLftRghtS
+tltLftRght
+tltLftUpLftS
+tltLftUpLft
+tltLftUpRghtS
+tltLftUpRght
+tltLftDnLftS
+tltLftDnLft
+tltLftDnRghtS
+tltLftDnRght
+tltRght
+tltRghtUp
+tltRghtDn
+tltRghtLftS
+tltRghtLft
+tltRghtRghtS
+tltRghtRght
+tltRghtUpLftS
+tltRghtUpLft
+tltRghtUpRghtS
+tltRghtUpRght
+tltRghtDnLftS
+tltRghtDnLft
+tltRghtDnRghtS
+tltRghtDnRght"
+left="lftS
+lft
+upLftS
+upLft
+dnLftS
+dnLft
+tltLft
+tltLftUp
+tltLftDn
+tltLftLftS
+tltLftLft
+tltLftRghtS
+tltLftRght
+tltLftUpLftS
+tltLftUpLft
+tltLftUpRghtS
+tltLftUpRght
+tltLftDnLftS
+tltLftDnLft
+tltLftDnRghtS
+tltLftDnRght"
+right="rghtS
+rght
+upRghtS
+upRght
+dnRghtS
+dnRght
+tltRght
+tltRghtUp
+tltRghtDn
+tltRghtRghtS
+tltRghtRght
+tltRghtLftS
+tltRghtLft
+tltRghtUpRghtS
+tltRghtUpRght
+tltRghtUpLftS
+tltRghtUpLft
+tltRghtDnRghtS
+tltRghtDnRght
+tltRghtDnLftS
+tltRghtDnLft"
+
+eyevariant="idle
+up
+dn
+lft
+rght
+upLft
+upRght
+dnLft
+dnRght"
+eyestate="open
+closedS
+closed
+wide"
+
+# need to know the width of the model to mirror the eyes
+modelwidth="$(tac "$1/idle/base/idle/0" | head -n1)"
+modelwidth="${#width}"
+
+for e in "$1/"* # iterate over emotes
+do
+	# bases
+	for i in $(seq 1 $(echo "$left" | wc -l))
+	do
+		l="$(echo "$left" | line $i)"
+		r="$(echo "$right" | line $i)"
+		echo $i $l base
+		[ -d "$e/base/$l" ] && {
+			mkdir -p "$e/base/$r"
+			( # subshell for cd
+				cd "$e/base/$l"
+				for k in [0-9]
+				do
+					echo "> $k"
+					rev "$k" > "../$r/$k"
+				done
+				cp config "../$r/config" # pos is unchanged for bases
+			)
+		}
+	done
+	# eyes
+	geneye() { # [$1 hosteye] [$2 targeteye]
+		hosteye="$1"
+		targeteye="$2"
+		for vs in $eyestate
+		do
+			for vi in $eyevariant
+			do
+				for i in $(seq 1 $(echo "$all" | wc -l))
+				do
+					l="$(echo "$all" | line $i)"
+					r="$(echo "$right" | line $i)"
+					echo $i $vs $vi $l $hosteye
+					echo "$e/$hosteye/$vs/$vi/$l"
+					[ -d "$e/$hosteye/$vs/$vi/$l" ] && {
+						mkdir -p "$e/$targeteye/$vs/$vi/$r"
+						echo sanity
+						( # subshell for cd
+							cd "$e/$hosteye/$vs/$vi/$l"
+							for k in [0-9]
+							do
+								echo "> $k"
+								rev "$e/$hosteye/$vs/$vi/$l/$k" > "$e/$targeteye/$vs/$vi/$r/$k"
+								fg= # dummy var
+								bg= # "
+								attr= # "
+								width= # NOT a dummy var
+								while IFS= read -r b # get state, nothing else
+								do
+									[ "$fg" ] || {
+										fg="$b"
+										continue
+									}
+									[ "$bg" ] || {
+										bg="$b"
+										continue
+									}
+									[ "$attr" ] || {
+										attr="$b"
+										continue
+									}
+									width=${#line}
+									break
+								done < "$e/$targeteye/$vs/$vi/$r/$k"
+								row=
+								while IFS= read -r b # mutate the config
+								do
+									[ "$row" ] || {
+										row="$b"
+										continue
+									}
+									echo "$row"
+									echo "$((modelwidth - b - width))"
+								done < "$e/$hosteye/$vs/$vi/$l/config" > "$e/$targeteye/$vs/$vi/$r/config"
+							done
+						)
+					}
+				done
+			done
+		done
+	}
+	geneye eyel eyer
+	geneye eyer eyel
+done

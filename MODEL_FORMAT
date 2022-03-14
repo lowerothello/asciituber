@@ -1,0 +1,128 @@
+MODEL FORMAT
+TODO: some prose or smth to explain rationale and shit
+TODO: not clear at all lol, honestly just rewrite the whole thing
+TODO: animations? like animated hair/jiggle physics?
+
+FILE TREE
+model root:i
+	EMOTE (def. idle)
+		TYPE (eg. base)
+			/ANGLE (eg. upLft)
+
+TYPE       DRAW ORDER
+- base     - 0
+- eyel     - 1
+- eyer     - 2
+- eyebrowl - 3
+- eyebrowr - 4
+- mouth    - 5
+- hair     - 6
+
+EMOTE
+emote handling
+- 'idle' is the fallback emote, any missing file will fallback to 'idle'
+- only provide changed files, don't copy 'idle' fully!
+- emotes can be named anything, but the default emote must be 'idle'
+
+ANGLES
+ANGLE LIST
+- proper missing angle handling, other than the neutral ones which are
+  required.
+- variant angles are concatenated on the end of the main type
+- yes, there's a lot to draw (45 angles), just don't draw the ones you're
+  happy skipping (some/all of the tilt variants can probably be skipped,
+  skipping all tilt angles means only 15 angles)
+MAIN ANGLES (idle is required)
+- idle
+- up
+- dn
+- lftS
+- lft
+- rghtS
+- rght
+- upLftS
+- upLft
+- upRghtS
+- upRght
+- dnLftS
+- dnLft
+- dnRghtS
+- dnRght
+- tltLft
+- tltLftUp
+- tltLftDn
+- tltLftLftS
+- tltLftLft
+- tltLftRghtS
+- tltLftRght
+- tltLftUpLftS
+- tltLftUpLft
+- tltLftUpRghtS
+- tltLftUpRght
+- tltLftDnLftS
+- tltLftDnLft
+- tltLftDnRghtS
+- tltLftDnRght
+- tltRght
+- tltRghtUp
+- tltRghtDn
+- tltRghtLftS
+- tltRghtLft
+- tltRghtRghtS
+- tltRghtRght
+- tltRghtUpLftS
+- tltRghtUpLft
+- tltRghtUpRghtS
+- tltRghtUpRght
+- tltRghtDnLftS
+- tltRghtDnLft
+- tltRghtDnRghtS
+- tltRghtDnRght
+
+EYES STRUCTURE
+ANGLE/state/dir
+
+state { (open is required)
+	open
+	closedS (half-closed)
+	closed
+	wide
+}
+dir { (idle is required)
+	up
+	dn
+	lft
+	rght
+	upLft
+	upRght
+	dnLft
+	dnRght
+}
+
+MOUTH STRUCTURE
+TODO:
+
+format:
+	/config:
+		line1: row offset (for all files)
+		line2: column offset (for all files)
+	/LAYERNUMBER:
+		line1: fg color (7 for default)
+		line2: bg color (0 for default)
+		line3: attribute (
+			0:normal
+			1:bold
+			2:faint (alias to bold on my system)
+			3:italic
+			4:underline
+			5:blink
+			7:swap fg/bg (can be used for hacky explicitly coloured whitespace)
+			9:strike
+		)
+		rest: ascii art
+
+LAYERNUMBER: a number, higher numbers are drawn later
+
+- Whitespace leaves what's already on the screen alone and is not coloured
+- Explicitly coloured whitespace is possible by using a layer where fg=bg
+  and any character OTHER than whitespace will appear as coloured whitespace
