@@ -8,6 +8,26 @@
 LBLINK=0
 RBLINK=0
 
+# user adjustable offset and trimming
+# set CGRAVITY to use centre gravity, will override X and Y
+CGRAVITY=1
+X=0
+Y=0
+W=80
+H=24
+
+# USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
+# mod offset, offsets the puppet
+MODX=0
+MODY=0
+# the base angle to show
+baseAngle=idle
+# the emote to show TODO: mixing 2+ emotes?
+EMOTE=idle
+
+# functions
+# ---------
+
 # get the size of a frame
 framewidth() { # [$1 /path/to/frame/0]
 	fg= # dummy vars
@@ -37,34 +57,6 @@ frameheight() { # [$1 /path/to/frame/0]
 		echo $((c - 3))
 	done
 }
-
-# user adjustable offset and trimming
-# set CGRAVITY to use centre gravity, will override X and Y
-CGRAVITY=1
-X=0
-Y=0
-W=80
-H=24
-
-# angle thresholds
-LOOKUP=10
-LOOKDN=5
-SIDESLIGHT=5
-SIDEFAR=20
-TILTSLIGHT=8
-
-
-# USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
-# mod offset, offsets the puppet
-MODX=0
-MODY=0
-# the base angle to show
-baseAngle=idle
-# the emote to show TODO: mixing 2+ emotes?
-EMOTE=idle
-
-# ---------
-# functions
 
 # min for 2 args
 min2() {
@@ -136,7 +128,7 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 					# a debug option, probably don't touch
 					# in an ideal world everything would be drawn linewise, but it's buggy
 					# true for charwise drawing  (complex but proper formatting and overlapping)
-					# false for linewise drawing (simpler but inherent overwriting and no bgcol support)
+					# false for linewise drawing (simpler but inherent overwriting so no bgcol support)
 					# set this to true unless it runs too slowly or smth and your model is super simple
 					true && {
 						# set the text formatting opts
@@ -178,12 +170,10 @@ float() { # [$1 float] [$2 mod]
 	case "$1" in
 		"-"*)
 			f="${1#???}" # trim first 3 chars
-			# echo $f >&2
 			f="-$((${f#${f%%[!0]*}} * $2))"
 			;;
 		*)
 			f="${1#??}" # trim first 2 chars
-			# echo $f >&2
 			f="$((${f#${f%%[!0]*}} * $2))"
 			;;
 	esac
@@ -193,7 +183,7 @@ float() { # [$1 float] [$2 mod]
 
 # set the pos based on the root bone
 # no z axis handling currently, not sure how to do it.
-#   maybe the z axis should affect the y axis? not sure.
+#   maybe the z axis should affect the y axis slightly? not sure.
 setpos() { # [$1 x] [$2 y] [$3 z]
 	# number chopping: 0.XX0000 -> (XX * 2)
 	MODX=$(($(float "$1" 3) * -1))
@@ -271,72 +261,72 @@ setangle() { # [$1 bone prefix] [$2-4 (explicit unused)] [$5 x] [$6 y] [$7 z] [$
 
 	if           [ $roll -gt $TILTSLIGHT ];     then # roll to the left
 		if       [ $pitch -gt $LOOKUP ];    then # pitch up
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftUpLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftUpLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftUpRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftUpRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftUpLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftUpLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftUpRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftUpRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltLftUp" # yaw centre
 			fi
 		elif     [ $pitch -lt -$LOOKDN ];   then # pitch down
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftDnLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftDnLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftDnRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftDnRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftDnLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftDnLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftDnRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftDnRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltLftDn" # yaw centre
 			fi
 		else                                     # pitch centre\$
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltLftLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltLftLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltLftRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltLftRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltLft" # yaw centre
 			fi
 		fi
 
 	elif         [ $roll -lt -$TILTSLIGHT ];    then # roll to the \$right
 		if       [ $pitch -gt $LOOKUP ];    then # pitch up
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtUpLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtUpLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtUpRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtUpRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtUpLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtUpLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtUpRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtUpRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltRghtUp" # yaw centre
 			fi
 		elif     [ $pitch -lt -$LOOKDN ];   then # pitch down
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtDnLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtDnLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtDnRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtDnRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtDnLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtDnLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtDnRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtDnRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltRghtDn" # yaw centre
 			fi
 		else                                     # pitch centre\$
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_tltRghtLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_tltRghtLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_tltRghtRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_tltRghtRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_tltRght" # yaw centre
 			fi
 		fi
 
 	else                                         # roll centre
 		if       [ $pitch -gt $LOOKUP ];    then # pitch up
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_upLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_upLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_upRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_upRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_upLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_upLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_upRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_upRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_up" # yaw centre
 			fi
 		elif     [ $pitch -lt -$LOOKDN ];   then # pitch down
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_dnLft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_dnLftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_dnRght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_dnRghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_dnLft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_dnLftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_dnRght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_dnRghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_dn" # yaw centre
 			fi
 		else                                     # pitch centre\$
-			if   [ $yaw -lt -$SIDEFAR ];    then eval "$1Angle=\$$1Angle_lft" # yaw far left
-			elif [ $yaw -lt -$SIDESLIGHT ]; then eval "$1Angle=\$$1Angle_lftS" # yaw slight left
-			elif [ $yaw -gt $SIDEFAR ];     then eval "$1Angle=\$$1Angle_rght" # yaw far right
-			elif [ $yaw -gt $SIDESLIGHT ];  then eval "$1Angle=\$$1Angle_rghtS" # yaw slight right
+			if   [ $yaw -lt -$LOOKSIDEFAR ];    then eval "$1Angle=\$$1Angle_lft" # yaw far left
+			elif [ $yaw -lt -$LOOKSIDESLIGHT ]; then eval "$1Angle=\$$1Angle_lftS" # yaw slight left
+			elif [ $yaw -gt $LOOKSIDEFAR ];     then eval "$1Angle=\$$1Angle_rght" # yaw far right
+			elif [ $yaw -gt $LOOKSIDESLIGHT ];  then eval "$1Angle=\$$1Angle_rghtS" # yaw slight right
 			else                                 eval "$1Angle=\$$1Angle_idle" # yaw centre
 			fi
 		fi

@@ -5,6 +5,13 @@
 PORT=39540
 TMPFILE=/tmp/$$
 
+# angle thresholds, how sensitive looking around is
+LOOKUP=10
+LOOKDN=5
+LOOKSIDESLIGHT=5
+LOOKSIDEFAR=20
+TILTSLIGHT=8
+
 # seconds each frame should be shown for
 # use for "smoothing" and managing cpu usage by the draw thread
 FRAMETIME=0.1
