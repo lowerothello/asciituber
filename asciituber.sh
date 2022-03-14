@@ -5,7 +5,9 @@
 PORT=39540
 TMPFILE=/tmp/$$
 
-FRAMETIME=0.1 # seconds each frame should be shown for
+# seconds each frame should be shown for
+# use for "smoothing" and managing cpu usage by the draw thread
+FRAMETIME=0.1
 
 
 which oscdump >/dev/null || {
@@ -19,6 +21,7 @@ EOF
 	exit 1
 }
 
+initangles "$1" 'base'
 initangles "$1" 'base'
 # draw thread
 (

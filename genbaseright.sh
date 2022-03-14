@@ -198,27 +198,7 @@ geneye() { # [$1 hosteye] [$2 targeteye]
 				for k in "$e/$1/$vs/$l/$vil/"[0-9]
 				do
 					rev "$e/$1/$vs/$l/$vil/${k##*/}" > "$e/$2/$vs/$r/$vir/${k##*/}"
-					fg= # dummy var
-					bg= # "
-					attr= # "
-					width= # NOT a dummy var
-					while IFS= read -r b # get state, nothing else
-					do
-						[ "$fg" ] || {
-							fg="$b"
-							continue
-						}
-						[ "$bg" ] || {
-							bg="$b"
-							continue
-						}
-						[ "$attr" ] || {
-							attr="$b"
-							continue
-						}
-						width=${#b}
-						break
-					done < "$e/$2/$vs/$r/$vir/${k##*/}"
+					width=$(framewidth "$e/$2/$vs/$r/$vir/${k##*/}")
 					row=
 					while IFS= read -r b # mutate the config
 					do

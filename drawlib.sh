@@ -1,19 +1,48 @@
 #!/bin/sh -e
 # a shell "library". good luck. it's needed. trust me.
 
-# --------------
 # starting state
+# --------------
 
 # set to 1 to blink that eye
 LBLINK=0
 RBLINK=0
 
+# get the size of a frame
+framewidth() { # [$1 /path/to/frame/0]
+	fg= # dummy vars
+	bg= # "
+	attr= # "
+	while IFS= read -r b # get state, nothing else
+	do
+		[ "$fg" ] || {
+			fg="$b"
+			continue
+		}
+		[ "$bg" ] || {
+			bg="$b"
+			continue
+		}
+		[ "$attr" ] || {
+			attr="$b"
+			continue
+		}
+		echo ${#b}
+		break
+	done < "$1"
+}
+frameheight() { # [$1 /path/to/frame/0]
+	echo "$(wc -l "$1")" | while read -r c _
+	do
+		echo $((c - 3))
+	done
+}
+
 # user adjustable offset and trimming
-# TODO: centre gravity as an option instead of top-left gravity
-#       need to retroactively set cos idk the width of the model
-#       until trying to draw it
-X=21
-Y=2
+# set CGRAVITY to use centre gravity, will override X and Y
+CGRAVITY=1
+X=0
+Y=0
 W=80
 H=24
 
@@ -25,14 +54,13 @@ SIDEFAR=20
 TILTSLIGHT=8
 
 
-
-# USED AND CHANGED INTERNALLY, BE CAREFUL
+# USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
 # mod offset, offsets the puppet
 MODX=0
 MODY=0
 # the base angle to show
 baseAngle=idle
-# the emote to show TODO: mixing 2+ emotes
+# the emote to show TODO: mixing 2+ emotes?
 EMOTE=idle
 
 # ---------
@@ -325,6 +353,14 @@ draw() { # [$1 /path/to/model]
 	eyelAngle=idle
 	eyerOpenness=$eyelOpenness
 	eyerAngle=$eyelAngle
+	[ "$CGRAVITY" ] && {
+		for k in "$1/$EMOTE/base/$baseAngle/"[0-9]
+		do
+			X=$(((W - $(framewidth "$k")) / 2 - 1)) # 1: magic number, lines it up right
+			Y=$(((H - $(frameheight "$k")) / 2))
+			break
+		done
+	}
 	drawblock "$1/$EMOTE/base/$baseAngle" # base
 	drawblock "$1/$EMOTE/eyel/$eyelOpenness/$baseAngle/$eyelAngle" # eyel
 	drawblock "$1/$EMOTE/eyer/$eyerOpenness/$baseAngle/$eyerAngle" # eyer
