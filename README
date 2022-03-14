@@ -22,3 +22,8 @@ Scripts:
 - ./genposnumbers: add a dummy file header to the text files, was
 -                  used for migration to a new format, useless now.
 - ./genbaseright : generates mirrored copies of symmetrical elements.
+
+
+What about Windows support?
+I don't use windows so I can't help much, but WSL (https://docs.microsoft.com/en-us/windows/wsl/)
+is probably your best bet.

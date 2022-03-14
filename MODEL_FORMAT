@@ -1,6 +1,5 @@
 MODEL FORMAT
-TODO: some prose or smth to explain rationale and shit
-TODO: not clear at all lol, honestly just rewrite the whole thing
+TODO: not clear at all lol, honestly just rewrite the whole thing lol
 TODO: animations? like animated hair/jiggle physics?
 
 FILE TREE
@@ -9,6 +8,7 @@ model root:i
 		TYPE (eg. base)
 			/ANGLE (eg. upLft)
 
+TODO: map file to map dirs to special types and define draw order
 TYPE       DRAW ORDER
 - base     - 0
 - eyel     - 1
@@ -18,6 +18,7 @@ TYPE       DRAW ORDER
 - mouth    - 5
 - hair     - 6
 
+TODO: map file to map the default emote and emotes to cases (eg. wide eyes)
 EMOTE
 emote handling
 - 'idle' is the fallback emote, any missing file will fallback to 'idle'
@@ -33,6 +34,11 @@ ANGLE LIST
   happy skipping (some/all of the tilt variants can probably be skipped,
   skipping all tilt angles means only 15 angles)
 MAIN ANGLES (idle is required)
+. . . . .   . . . . .   . . . . .
+. . . . .   . . . . .   . . . . .
+. . . . .   . . . . .   . . . . .
+TLTLFT      IDLE        TLTRGHT
+
 - idle
 - up
 - dn
@@ -80,8 +86,7 @@ MAIN ANGLES (idle is required)
 - tltRghtDnRght
 
 EYES STRUCTURE
-ANGLE/state/dir
-
+BASE/state/ANGLE/dir
 state { (open is required)
 	open
 	closedS (half-closed)
@@ -112,16 +117,16 @@ format:
 		line3: attribute (
 			0:normal
 			1:bold
-			2:faint (alias to bold on my system)
+			2:faint
 			3:italic
 			4:underline
-			5:blink
-			7:swap fg/bg (can be used for hacky explicitly coloured whitespace)
+			5:blink (didn't know this was a thing, it's cool though)
+			7:swap fg/bg (probably useless)
 			9:strike
 		)
 		rest: ascii art
 
-LAYERNUMBER: a number, higher numbers are drawn later
+LAYERNUMBER: a number, higher numbers are drawn later, 0-9
 
 - Whitespace leaves what's already on the screen alone and is not coloured
 - Explicitly coloured whitespace is possible by using a layer where fg=bg
