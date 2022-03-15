@@ -9,8 +9,8 @@ LBLINK=0
 RBLINK=0
 
 # user adjustable offset and trimming
-# set CGRAVITY to use centre gravity, will override X and Y
-CGRAVITY=1
+# set AUTO to automatically centre
+AUTO=1
 X=0
 Y=0
 W=80
@@ -343,7 +343,9 @@ draw() { # [$1 /path/to/model]
 	eyelAngle=idle
 	eyerOpenness=$eyelOpenness
 	eyerAngle=$eyelAngle
-	[ "$CGRAVITY" ] && {
+	[ "$AUTO" ] && {
+		W=$(tput cols)
+		H=$(tput lines)
 		for k in "$1/$EMOTE/base/$baseAngle/"[0-9]
 		do
 			X=$(((W - $(framewidth "$k")) / 2 - 1)) # 1: magic number, lines it up right
@@ -352,8 +354,10 @@ draw() { # [$1 /path/to/model]
 		done
 	}
 	drawblock "$1/$EMOTE/base/$baseAngle" # base
-	drawblock "$1/$EMOTE/eyel/$eyelOpenness/$baseAngle/$eyelAngle" # eyel
-	drawblock "$1/$EMOTE/eyer/$eyerOpenness/$baseAngle/$eyerAngle" # eyer
+	[ "$SKIPEYES" ] || {
+		drawblock "$1/$EMOTE/eyel/$eyelOpenness/$baseAngle/$eyelAngle" # eyel
+		drawblock "$1/$EMOTE/eyer/$eyerOpenness/$baseAngle/$eyerAngle" # eyer
+	}
 	printf "\033[${H};${W}H"
 
 	# # draw the blinks

@@ -5,6 +5,8 @@
 # Useful for the eyes, the mouth, and any symmetrical overlays
 # like glasses.
 
+. ./drawlib.sh # literally just for 1 function
+
 [ "$1" ] || {
 	echo 'missing argument [$1 /path/to/model]'
 	exit 1
@@ -155,41 +157,38 @@ genelse() { # [$1 type]
 		mkdir -p "$e/$1/$r"
 		for k in "$e/$1/$l/"[0-9]
 		do
-			echo "$e/$1/$l/${k##*/} > $e/$1/$r/${k##*/}"
+			echo "${e#"$modelroot/"}/$1/$l/${k##*/} > ${e#"$modelroot/"}/$1/$r/${k##*/}"
 			rev "$e/$1/$l/${k##*/}" > "$e/$1/$r/${k##*/}"
 		done
 		cp "$e/$1/$l/config" "$e/$1/$r/config" # pos is unchanged for bases, just cp over
 	done
 }
 # eyes
-geneye() { # [$1 hosteye] [$2 targeteye] [$3 hostangles] [$4 targetangles]
+geneye() { # [$1 hosteye] [$2 targeteye]
 	for vs in $eyestate
 	do
 		[ -d "$e/$1/$vs" ] || continue
-		for vi in $eyevariant
+		for i in $(seq 1 $(echo "$all" | wc -l))
 		do
-			# flip the names if necessary
-			li="$(echo "$3" | lineindex "$vi")"
+			# flip the names and break if not flipping
+			a="$(echo "$all" | line "$i")"
+			li="$(echo "$left" | lineindex "$a")"
 			[ "$li" ] && {
-				vil="$(echo "$3" | line "$li")"
-				vir="$(echo "$4" | line $li)"
+				l="$(echo "$left" | line "$li")"
+				r="$(echo "$right" | line $li)"
 			} || {
-				vil="$vi"
-				vir="$vi"
+				continue
 			}
-			for i in $(seq 1 $(echo "$all" | wc -l))
+			for vi in $eyevariant
 			do
 				# flip the names if necessary
-				a="$(echo "$all" | line "$i")"
-				li="$(echo "3" | lineindex "$a")"
+				li="$(echo "$left" | lineindex "$vi")"
 				[ "$li" ] && {
-					l="$(echo "$3" | line "$li")"
-					r="$(echo "$4" | line $li)"
-					# nameflip=1
+					vil="$(echo "$left" | line "$li")"
+					vir="$(echo "$right" | line $li)"
 				} || {
-					l="$a"
-					r="$a"
-					# nameflip=0
+					vil="$vi"
+					vir="$vi"
 				}
 				
 				[ -d "$e/$1/$vs/$l/$vil" ] || continue
@@ -211,7 +210,7 @@ geneye() { # [$1 hosteye] [$2 targeteye] [$3 hostangles] [$4 targetangles]
 						echo "$((modelwidth - b - width + offset))"
 					done < "$e/$1/$vs/$l/$vil/config" > "$e/$2/$vs/$r/$vir/config"
 
-					echo "$e/$1/$vs/$l/$vil/${k##*/} > $e/$2/$vs/$r/$vir/${k##*/} (bangle=$a:eangle=$vi:w=$width)"
+					echo "${e#"$modelroot/"}/$1/$vs/$l/$vil/${k##*/} > ${e#"$modelroot/"}/$2/$vs/$r/$vir/${k##*/}"
 				done
 			done
 		done
@@ -219,20 +218,21 @@ geneye() { # [$1 hosteye] [$2 targeteye] [$3 hostangles] [$4 targetangles]
 }
 genwrapper() { # [$1 type to gen]
 	case "$1" in
-		eyel) geneye eyel eyer "$left" "$right" ;;
-		eyer) geneye eyer eyel "$right" "$left" ;;
+		eyel) geneye eyel eyer ;;
+		eyer) geneye eyer eyel ;;
 		*)    genelse "$1" ;;
 	esac
 }
 
-for e in "$1/"* # iterate over emotes
+modelroot="$1"
+for e in "$modelroot/"* # iterate over emotes
 do
 	[ -d "$e" ] || continue # skip regular files in the model root
-	[ -f "$1/mirrorlist" ] && { # only mirror files in the mirror list
+	[ -f "$modelroot/mirrorlist" ] && { # only mirror files in the mirror list
 		while read -r d _
 		do
 			genwrapper "$d"
-		done < "$1/mirrorlist"
+		done < "$modelroot/mirrorlist"
 	} || { # else exit and call it a success
 		echo "missing mirrorlist, mirroring nothing!"
 		exit 0

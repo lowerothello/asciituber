@@ -51,6 +51,18 @@ upleftrightrectify() {
 	angle up
 	sleep $delay
 }
+dnleftright() {
+	angle dn
+	angle dnLftS
+	angle dnLft
+	angle dnLftS
+	angle dn
+	angle dnRghtS
+	angle dnRght
+	angle dnRghtS
+	angle dn
+	sleep $delay
+}
 dnleftrightrectify() {
 	angle dn
 	angle dnLftS
@@ -422,13 +434,14 @@ tltdnleftrightab() {
 	angle dnRghtS
 }
 
-delay=0.5
+delay=0.2
 
 while :
 do
 	# tltupdown
 	# simpletlt
-	# tltsmallspin
+	# smallspin
+	# bigspin
 	# tltdiagonal
 	# tltdiagonal2
 	# leftrightupdownrectify
@@ -437,10 +450,13 @@ do
 	# dnleftrightrectify
 	# tltleftright
 	# tltdnleftrightab
-	# angle rght
-	# angle tltLftRght
-	# angle upRght
-	# angle tltLftUpRght
-	angle rghtS
-	angle lftS
+	# angle lftS
+	SKIPEYES=
+	upleftright
+	leftright
+	dnleftright
+	SKIPEYES=1
+	upleftright
+	leftright
+	dnleftright
 done
