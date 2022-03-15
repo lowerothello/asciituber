@@ -114,6 +114,7 @@ state { (open is required)
 	wide
 }
 dir { (idle is required)
+	idle
 	up
 	dn
 	lft

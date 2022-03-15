@@ -191,16 +191,42 @@ setpos() { # [$1 x] [$2 y] [$3 z]
 }
 
 # determine fallbacks for missing angles
-# determine which angle files are available in idle/base, and assume they are the wanted angles
-# run once at the start
+# determine which angle files are available in idle/$prefix
+# will set $prefix\Angle_$angle to it's fallback
+# run once at the start for each needed prefix
 initangles() { # [$1 /path/to/model] [$2 prefix]
 	base="$1/idle/$2"
 	[ -d "$base" ] || {
 		echo "invalid model: missing idle/$2 directory" >&2
 		exit 1
 	}
+
+	# EYES
+	case "$2" in
+		"eyel"|"eyer")
+			# eye openness fallbacks
+			eval "$2Open_open=open"
+			[ -d "$base/closedS" ] && eval "$2Open_closedS=closedS" || eval "$2Open_closedS=idle"
+			[ -d "$base/closed" ]  && eval "$2Open_closed=closed"   || eval "$2Open_closed=\$$2Open_closedS"
+			[ -d "$base/wide" ]    && eval "$2Open_wide=wide"       || eval "$2Open_wide=idle"
+			# set the base for later
+			base="$base/open"
+			# eye look direction fallbacks
+			lookbase="$base/idle"
+			eval "$2Look_idle=idle"
+			[ -d "$lookbase/up" ]     && eval "$2Look_up=up"         || eval "$2Look_up=idle"
+			[ -d "$lookbase/dn" ]     && eval "$2Look_dn=dn"         || eval "$2Look_dn=idle"
+			[ -d "$lookbase/lft" ]    && eval "$2Look_lft=lft"       || eval "$2Look_lft=idle"
+			[ -d "$lookbase/rght" ]   && eval "$2Look_rght=rght"     || eval "$2Look_rght=idle"
+			[ -d "$lookbase/upLft" ]  && eval "$2Look_upLft=upLft"   || eval "$2Look_upLft=\$$2Look_lft"
+			[ -d "$lookbase/upRght" ] && eval "$2Look_upRght=upRght" || eval "$2Look_upRght=\$$2Look_rght"
+			[ -d "$lookbase/dnLft" ]  && eval "$2Look_dnLft=dnLft"   || eval "$2Look_dnLft=\$$2Look_lft"
+			[ -d "$lookbase/dnRght" ] && eval "$2Look_dnRght=dnRght" || eval "$2Look_dnRght=\$$2Look_rght"
+
+	esac
+
 	[ -d "$base/idle" ] || {
-		echo "invalid model: missing idle angle" >&2
+		echo "invalid model prefix: missing idle angle" >&2
 		exit 1
 	}
 
