@@ -2,7 +2,7 @@
 # [$1 /path/to/model]
 . ./drawlib.sh
 
-PORT=39540
+PORT=39539
 TMPFILE=/tmp/$$
 
 # angle thresholds, how sensitive looking around is

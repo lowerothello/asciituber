@@ -126,7 +126,25 @@ dir { (idle is required)
 }
 
 MOUTH STRUCTURE
-TODO:
+mouth/state/ANGLE
+
+i   oSi  io
+iS  ioS  iSo
+c   oS   o
+
+state { (closed is required)
+	closed
+	iS
+	i
+	oS
+	o
+	ioS
+	oSi
+	iSo
+	io
+	tongueS
+	tongue
+}
 
 format:
 	/config:

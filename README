@@ -11,7 +11,7 @@ Features:
 
 Simple Usage:
 -------------
-Send VRM data to localhost:3940 (the port can be changed at the top of ./asciituber), then run ./asciituber giving a model as an argument. Any extra usage information can be found by reading the scripts. Use an 80x24 terminal, any other sizes need manual adjustment currently.
+Send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), then run ./asciituber giving a model as an argument. Any extra usage information can be found by reading the scripts. Use an 80x24 terminal, any other sizes need manual adjustment currently.
 
 Models:
 -------

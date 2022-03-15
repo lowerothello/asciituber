@@ -440,8 +440,9 @@ while :
 do
 	# tltupdown
 	# simpletlt
-	# smallspin
-	# bigspin
+	# tltsmallspin
+	# tltbigspin
+	angle idle
 	# tltdiagonal
 	# tltdiagonal2
 	# leftrightupdownrectify
@@ -451,12 +452,4 @@ do
 	# tltleftright
 	# tltdnleftrightab
 	# angle lftS
-	SKIPEYES=
-	upleftright
-	leftright
-	dnleftright
-	SKIPEYES=1
-	upleftright
-	leftright
-	dnleftright
 done

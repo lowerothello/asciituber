@@ -365,8 +365,8 @@ draw() { # [$1 /path/to/model]
 	printf "\033[2J\033[H"
 	# draw the base
 	# echo $baseAngle $baseAngle_upLftS
-	eyelOpenness=open
-	eyelAngle=idle
+	eyelOpenness=open # TODO: gen properly instead of hardcoding
+	eyelAngle=idle # TODO: gen properly instead of hardcoding
 	eyerOpenness=$eyelOpenness
 	eyerAngle=$eyelAngle
 	[ "$AUTO" ] && {
@@ -385,8 +385,4 @@ draw() { # [$1 /path/to/model]
 		drawblock "$1/$EMOTE/eyer/$eyerOpenness/$baseAngle/$eyerAngle" # eyer
 	}
 	printf "\033[${H};${W}H"
-
-	# # draw the blinks
-	# [ $LBLINK == 1 ] && drawblock < "$1/$EMOTE/eyel/eyel$eyelAngle\Closed"
-	# [ $RBLINK == 1 ] && drawblock < "$1/$EMOTE/eyer/eyel$eyelAngle\Closed"
 }
