@@ -65,11 +65,8 @@ min2() {
 
 # draw a block
 drawblock() { # [$1 /path/to/directory] [$2 debug line]
-	[ -d "$1" ] || {
-		# printf "\033[Hwarn: drawblock asked to draw nonexistent dir '%s'" "$1" >&2
-		# printf "warn: drawblock asked to draw nonexistent dir '%s'" "$1" >&2
-		return 0
-	}
+	[ -d "$1" ] || return 0
+
 	log=
 	row=
 	col=
@@ -135,7 +132,7 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 						printf '\033[%sm\033[38;5;%sm\033[48;5;%sm' "$attr" "$fg" "$bg"
 						# read -n isn't posix, the alternative to get single chars is dd which is worse
 						strptr=0
-						printf '%s' "$line" | while IFS= read -n1 char
+						printf '%s' "$line" | while IFS= read -rn1 char
 						do
 							strptr=$((strptr + 1))
 							[ "$strptr" -gt "$trimwidth" ] && break
@@ -365,24 +362,29 @@ draw() { # [$1 /path/to/model]
 	printf "\033[2J\033[H"
 	# draw the base
 	# echo $baseAngle $baseAngle_upLftS
-	eyelOpenness=open # TODO: gen properly instead of hardcoding
+	eyelState=open # TODO: gen properly instead of hardcoding
 	eyelAngle=idle # TODO: gen properly instead of hardcoding
-	eyerOpenness=$eyelOpenness
+	eyerState=$eyelState
 	eyerAngle=$eyelAngle
+	mouthState=closed
 	[ "$AUTO" ] && {
 		W=$(tput cols)
 		H=$(tput lines)
+		# for loop to enumerate the first text file
 		for k in "$1/$EMOTE/base/$baseAngle/"[0-9]
 		do
-			X=$(((W - $(framewidth "$k")) / 2 - 1)) # 1: magic number, lines it up right
+			X=$(((W - $(framewidth "$k")) / 2 - 1)) # 1: magic number, seems to line it up right
 			Y=$(((H - $(frameheight "$k")) / 2))
 			break
 		done
 	}
 	drawblock "$1/$EMOTE/base/$baseAngle" # base
 	[ "$SKIPEYES" ] || {
-		drawblock "$1/$EMOTE/eyel/$eyelOpenness/$baseAngle/$eyelAngle" # eyel
-		drawblock "$1/$EMOTE/eyer/$eyerOpenness/$baseAngle/$eyerAngle" # eyer
+		drawblock "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" # eyel
+		drawblock "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" # eyer
+	}
+	[ "$SKIPMOUTH" ] || {
+		drawblock "$1/$EMOTE/mouth/$mouthState/$baseAngle"
 	}
 	printf "\033[${H};${W}H"
 }
