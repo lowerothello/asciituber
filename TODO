@@ -1,0 +1,3 @@
+- rely less on relative dirs, calling asciituber from any directory other than . breaks things
+
+# vim: wrap
