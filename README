@@ -11,11 +11,11 @@ Features:
 
 Simple Usage:
 -------------
-Send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), then run ./asciituber giving a model as an argument. Any extra usage information can be found by reading the scripts.
+Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), and run ./asciituber giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code.
 
 Models:
 -------
-Example models are in ./models, they are free to use as a base if you want to. Documentation of the format is in ./MODEL_FORMAT (it's pretty badly written, inspect the example models for more up to date info).
+Example models are in ./models, they are free to use as bases if you want to. Documentation of the format is in ./MODEL_FORMAT (it's pretty badly written, inspect the example models for more up to date info).
 
 Scripts:
 --------
@@ -24,6 +24,10 @@ Scripts:
 - ./drawlib      : sourced internally to actually draw the model
 - ./genposnumbers: add a dummy file header to the text files, was used for migration to a new format, useless now
 - ./genbaseright : generates mirrored copies of symmetrical elements
+
+C Components:
+-------------
+- ./drawblock.c  : reimplementation of the shell function "drawblock" for speed, mapped to "drawblockc"
 
 
 # vim: wrap
