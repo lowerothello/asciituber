@@ -2,15 +2,18 @@
 # [$1 /path/to/model]
 . ./drawlib.sh
 
-PORT=39539
-TMPFILE=/tmp/$$
+PORT=39540
+tmpfile=/tmp/$$
 
-# angle thresholds, how sensitive looking around is
+# angle thresholds, how sensitive the head angles are
 LOOKUP=10
 LOOKDN=5
 LOOKSIDESLIGHT=5
 LOOKSIDEFAR=20
 TILTSLIGHT=8
+# blink thresholds, how sensitive the eyelids are (0~12)
+BLINKHALF=3
+BLINKFULL=10
 
 # seconds each frame should be shown for
 # use for "smoothing" and managing cpu usage by the draw thread
@@ -30,13 +33,12 @@ EOF
 
 initangles "$1" 'base'
 initangles "$1" 'base'
-# draw thread
+# draw process
 (
 	while :
 	do
 		# reset new state (shell is jank for this)
-		# TODO: remove the subshell? xargs doesn't like newlines
-		eval $(cat "$TMPFILE")
+		eval $(cat "$tmpfile")
 		draw "$1"
 		sleep $FRAMETIME
 	done
@@ -68,20 +70,16 @@ do
 		"/VMC/Ext/Blend/Val")
 			case "$arg1" in
 				'"Blink_L"')
-					# TODO: not posix compliant
-					argv="${argv::1}"
-					[ "$argv" -eq 1 ] && RBLINK=1 || RBLINK=0
+					setblink 'eyer' $argv
 					;;
 				'"Blink_R"')
-					# TODO: not posix compliant
-					argv="${argv::1}"
-					[ "$argv" -eq 1 ] && LBLINK=1 || LBLINK=0
+					setblink 'eyel' $argv
 					;;
 			esac
 			;;
 		"/VMC/Ext/Blend/Apply")
 			# dump new state (shell is jank for this)
-			set > "$TMPFILE"
+			set > "$tmpfile"
 			;;
 	esac
 done

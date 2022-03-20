@@ -7,7 +7,7 @@ model="$1"
 initangles "$model" 'base'
 
 angle() {
-	baseAngle=$1 draw "$model"
+	baseAngle="$1" draw "$model"
 	sleep $delay
 }
 
@@ -438,11 +438,10 @@ delay=0.2
 
 while :
 do
-	# tltupdown
+	# updown
 	# simpletlt
 	# tltsmallspin
 	# tltbigspin
-	angle idle
 	# tltdiagonal
 	# tltdiagonal2
 	# leftrightupdownrectify
@@ -451,5 +450,5 @@ do
 	# dnleftrightrectify
 	# tltleftright
 	# tltdnleftrightab
-	# angle lftS
+	angle idle
 done

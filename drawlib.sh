@@ -5,25 +5,27 @@
 # --------------
 
 # set to 1 to blink that eye
-LBLINK=0
-RBLINK=0
+export LBLINK=0
+export RBLINK=0
 
 # user adjustable offset and trimming
 # set AUTO to automatically centre
-AUTO=1
-X=0
-Y=0
-W=80
-H=24
+export AUTO=1
+export X=0
+export Y=0
+export W=80
+export H=24
 
 # USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
 # mod offset, offsets the puppet
-MODX=0
-MODY=0
+export MODX=0
+export MODY=0
 # the base angle to show
-baseAngle=idle
+export baseAngle=idle
+export eyelState=open
+export eyerState=$eyelState
 # the emote to show TODO: mixing 2+ emotes?
-EMOTE=idle
+export EMOTE=idle
 
 # functions
 # ---------
@@ -64,6 +66,9 @@ min2() {
 }
 
 # draw a block
+drawblockc() {
+	./drawblock "$@"
+}
 drawblock() { # [$1 /path/to/directory] [$2 debug line]
 	[ -d "$1" ] || return 0
 
@@ -97,7 +102,7 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 			xpos=$((X + MODX + col))
 			ltrim=0
 			[ "$xpos" -le 0 ] && {
-				ltrim=$(((xpos) * -1 + 1))
+				ltrim=$((xpos * -1 + 1))
 			}
 		}
 
@@ -130,17 +135,35 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 					true && {
 						# set the text formatting opts
 						printf '\033[%sm\033[38;5;%sm\033[48;5;%sm' "$attr" "$fg" "$bg"
-						# read -n isn't posix, the alternative to get single chars is dd which is worse
 						strptr=0
-						printf '%s' "$line" | while IFS= read -rn1 char
-						do
+						# read -n isn't posix, but dd is far too slow for this
+						# allow the posix version if it's really wanted
+						common() {
 							strptr=$((strptr + 1))
 							[ "$strptr" -gt "$trimwidth" ] && break
 							[ "$char" = " " ] || {
-								printf "\033[$((lineno));$((xpos + strptr))H%s" "$char"
+								printf "\033[$((lineno));$((xpos + strptr - 1))H%s" "$char"
 							}
 							:
-						done
+						}
+						[ "$POSIXLY_CORRECT" ] && {
+							while :
+							do
+								char="$(printf '%s' "$line" | dd count=1 bs=1 2>/dev/null)"
+								[ "$char" ] || break
+								line="${line#"$char"}"
+								common
+							done
+							[ "$HIDEWARNINGS" ] || {
+								printf '\033[H [POSIXLY_CORRECT, DO \033[3mNOT\033[m REPORT SPEED ISSUES]
+ [hide this message by setting $HIDEWARNINGS]\033[H'
+							}
+						} || {
+							printf '%s' "$line" | while IFS= read -rn1 char
+							do
+								common
+							done
+						}
 						# unset the text formatting opts
 						printf '\033[m'
 					} || {
@@ -162,19 +185,34 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 }
 
 # primitive way to work with floats in a language that doesn't support them
-# number chopping: 0.XX0000 -> (XX * mod)
-float() { # [$1 float] [$2 mod]
-	case "$1" in
+# Types:
+# 1.) 0.XX0000 -> (XX * mod)
+# 2.) X.X00000 -> (XX * mod)
+float() { # [$1 float] [$2 modifier] [$3 type]
+	negative=
+	f="$1"
+	case "$f" in
 		"-"*)
-			f="${1#???}" # trim first 3 chars
-			f="-$((${f#${f%%[!0]*}} * $2))"
+			negative=1
+			f="${f#-}"
+	esac
+	case "$3" in
+		1)
+			f="${f#??}" # trim first 2 chars
+			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr)
+			f="${f%????}" # trim last 4 chars
+			;;
+		2)
+			f="${f%???????}${f#??}" # remove the dot in the most roundabout way possible
+			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr)
+			f="${f%?????}" # trim last 5 chars
 			;;
 		*)
-			f="${1#??}" # trim first 2 chars
-			f="$((${f#${f%%[!0]*}} * $2))"
+			echo float: missing type
+			exit 1
 			;;
 	esac
-	f="${f%????}"
+	[ "$negative" ] || f="-$f"
 	[ "$f" == "-" ] || [ "$f" == "" ] && echo 0 || echo "$f"
 }
 
@@ -183,8 +221,8 @@ float() { # [$1 float] [$2 mod]
 #   maybe the z axis should affect the y axis slightly? not sure.
 setpos() { # [$1 x] [$2 y] [$3 z]
 	# number chopping: 0.XX0000 -> (XX * 2)
-	MODX=$(($(float "$1" 3) * -1))
-	MODY=$(($(float "$2" 2) * -1))
+	MODX=$(($(float "$1" 3 1) * -1))
+	MODY=$(($(float "$2" 2 1) * -1))
 }
 
 # determine fallbacks for missing angles
@@ -201,11 +239,10 @@ initangles() { # [$1 /path/to/model] [$2 prefix]
 	# EYES
 	case "$2" in
 		"eyel"|"eyer")
-			# eye openness fallbacks
-			eval "$2Open_open=open"
-			[ -d "$base/closedS" ] && eval "$2Open_closedS=closedS" || eval "$2Open_closedS=idle"
-			[ -d "$base/closed" ]  && eval "$2Open_closed=closed"   || eval "$2Open_closed=\$$2Open_closedS"
-			[ -d "$base/wide" ]    && eval "$2Open_wide=wide"       || eval "$2Open_wide=idle"
+			# eye state fallbacks
+			eval "$2State_open=open"
+			[ -d "$base/half" ]    && eval "$2State_half=half"       || eval "$2State_half=open"
+			[ -d "$base/closed" ]  && eval "$2State_closed=closed"   || eval "$2State_closed=\$$2State_half"
 			# set the base for later
 			base="$base/open"
 			# eye look direction fallbacks
@@ -277,10 +314,9 @@ initangles() { # [$1 /path/to/model] [$2 prefix]
 
 # set the angle based on the head bone
 setangle() { # [$1 bone prefix] [$2-4 (explicit unused)] [$5 x] [$6 y] [$7 z] [$8 w (unused cos quaternions suck ass, like srsly fuck these thingsss)]
-	pitch=$(float "$5" 1)
-	yaw=$(float "$6" 1)
-	roll=$(float "$7" 1)
-	# printf "\033[$H;1H%s\n" "$pitch $yaw $roll"
+	pitch=$(float "$5" 1 1)
+	yaw=$(float "$6" 1 1)
+	roll=$(float "$7" 1 1)
 
 	if           [ $roll -gt $TILTSLIGHT ];     then # roll to the left
 		if       [ $pitch -gt $LOOKUP ];    then # pitch up
@@ -356,17 +392,24 @@ setangle() { # [$1 bone prefix] [$2-4 (explicit unused)] [$5 x] [$6 y] [$7 z] [$
 	fi
 }
 
+setblink() { # [$1 eye] [$2 value]
+	# BLINKHALF BLINKFULL
+	val="$(float "$2" 1 2)"
+	if   [ $val -gt $BLINKFULL ]; then eval "$1State=\$$1State_closed"
+	elif [ $val -gt $BLINKHALF ]; then eval "$1State=\$$1State_half"
+	else                           eval "$1State=\$$1State_open"
+	fi
+}
+
 # draw the current state
 draw() { # [$1 /path/to/model]
 	# clear the screen
 	printf "\033[2J\033[H"
 	# draw the base
 	# echo $baseAngle $baseAngle_upLftS
-	eyelState=open # TODO: gen properly instead of hardcoding
-	eyelAngle=idle # TODO: gen properly instead of hardcoding
-	eyerState=$eyelState
-	eyerAngle=$eyelAngle
-	mouthState=closed
+	export eyelAngle=idle # TODO: gen properly instead of hardcoding
+	export eyerAngle=$eyelAngle
+	export mouthState=closed
 	[ "$AUTO" ] && {
 		W=$(tput cols)
 		H=$(tput lines)
@@ -378,13 +421,13 @@ draw() { # [$1 /path/to/model]
 			break
 		done
 	}
-	drawblock "$1/$EMOTE/base/$baseAngle" # base
+	drawblockc "$1/$EMOTE/base/$baseAngle" # base
 	[ "$SKIPEYES" ] || {
-		drawblock "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" # eyel
-		drawblock "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" # eyer
+		drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" # eyel
+		drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" # eyer
 	}
 	[ "$SKIPMOUTH" ] || {
-		drawblock "$1/$EMOTE/mouth/$mouthState/$baseAngle"
+		drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle"
 	}
 	printf "\033[${H};${W}H"
 }

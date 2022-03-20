@@ -109,9 +109,8 @@ EYES STRUCTURE
 BASE/state/ANGLE/dir
 state { (open is required)
 	open
-	closedS (half-closed)
+	half (half-closed)
 	closed
-	wide
 }
 dir { (idle is required)
 	idle
@@ -128,9 +127,13 @@ dir { (idle is required)
 MOUTH STRUCTURE
 mouth/state/ANGLE
 
-i   oSi  io
-iS  ioS  iSo
-c   oS   o
+Talking shapes, esoterically named
+'i' is for the I shape
+'o' is for the O shape
+There's slight variants for each and all the mix variants between the two.
+|  i   oSi  io
+|  iS  ioS  iSo
+|      oS   o
 
 state { (closed is required)
 	closed
@@ -144,6 +147,8 @@ state { (closed is required)
 	io
 	tongueS
 	tongue
+	openTongueS
+	openTongue
 }
 
 format:
