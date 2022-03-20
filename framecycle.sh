@@ -1,6 +1,6 @@
 #!/bin/sh -e
 # [$1 /path/to/model]
-. ./drawlib.sh
+. ./asciituber.sh
 
 model="$1"
 

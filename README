@@ -1,17 +1,17 @@
 ASCIITUBER
 ----------
 Ascii art VTubing software
-Renders a VTuber model, in (mostly) POSIX compliant shell
+Renders a VTuber model in your terminal
 
 Features:
 ---------
 - Full text attribute (colours, bold, italics, etc.) support
-- Simple, easy to modify to suit your needs with a little bit of shell knowledge
-- Mostly POSIX compliant, there's a some ${var::} and some read -n and probably some others in here still
+- Simple, easy to extend to suit your needs
+- POSIX compliant, any POSIX incompatibility is an issue and should be reported
 
 Simple Usage:
 -------------
-Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), and run ./asciituber giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code or by reading the error messages.
+Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./vrm), and run ./vrm giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code or by reading the error messages.
 
 Models:
 -------
@@ -19,9 +19,9 @@ Example models are in ./models, they are free to use as bases if you want to. Do
 
 Scripts:
 --------
-- ./asciituber   : reads vrm data from a port and draws the model
+- ./vrm          : reads vrm data from a port and draws the model
+- ./asciituber   : provides functions to draw and otherwise manipulate models
 - ./framecycle   : manually program a loop of frames, helps when making models to see how motion looks
-- ./drawlib      : sourced internally to actually draw the model
 - ./genposnumbers: add a dummy file header to the text files, was used for migration to a new format, useless now
 - ./genbaseright : generates mirrored copies of symmetrical elements
 

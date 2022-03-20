@@ -1,7 +1,7 @@
 #!/bin/sh -e
 # [$1 /path/to/model]
 # Reads state from a named pipe
-. ./drawlib.sh
+. ./asciituber.sh
 
 MODEL="$1"
 tmpfile=/tmp/$$

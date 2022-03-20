@@ -5,7 +5,7 @@
 # Useful for the eyes, the mouth, and any symmetrical overlays
 # like glasses.
 
-. ./drawlib.sh # literally just for 1 function
+. ./asciituber.sh # literally just for 1 function
 
 [ "$1" ] || {
 	echo 'missing argument [$1 /path/to/model]'
