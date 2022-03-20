@@ -11,7 +11,7 @@ Features:
 
 Simple Usage:
 -------------
-Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), and run ./asciituber giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code.
+Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./asciituber), and run ./asciituber giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code or by reading the error messages.
 
 Models:
 -------
