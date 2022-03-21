@@ -15,7 +15,7 @@ Run ./make to build the c components (a working compiler is required, you might 
 
 Models:
 -------
-Example models are in ./models, they are free to use as bases if you want to. Documentation of the format is in ./MODEL_FORMAT (it's pretty badly written, inspect the example models for more up to date info).
+Example models are in ./models, they are free to use as bases or as is under the same MIT license as this repo is under. Documentation of the format is in ./MODEL_FORMAT (it's pretty badly written, inspect the example models for more up to date info).
 
 Scripts:
 --------
