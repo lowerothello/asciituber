@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 # [$1 /path/to/model]
 # Reads state from a named pipe
 . ./asciituber.sh
@@ -21,9 +21,8 @@ baseAngle=idle
 (
 	while :
 	do
-		# eval $(cat "$drawfile")
-		# [ "$MODEL" ] && draw "$MODEL"
-		draw "$MODEL"
+		eval $(cat "$drawfile")
+		[ "$MODEL" ] && draw "$MODEL"
 		sleep $delay
 	done
 ) &
@@ -32,11 +31,12 @@ drawprocpid=$!
 while :
 do
 	pipeval="$(cat "$tmpfile")"
+	# echo "$pipeval"
 	case "$pipeval" in
-		angle*)
+		'angle '*)
 			baseAngle="${pipeval#* }"
 			;;
-		model*)
+		'model '*)
 			MODEL="${pipeval#* }"
 			initangles "$MODEL" 'base'
 			;;

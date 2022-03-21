@@ -421,13 +421,17 @@ draw() { # [$1 /path/to/model]
 			break
 		done
 	}
-	drawblockc "$1/$EMOTE/base/$baseAngle" # base
+	[ -d "$1/$EMOTE/base/$baseAngle" ] \
+		&& drawblockc "$1/$EMOTE/base/$baseAngle"
 	[ "$SKIPEYES" ] || {
-		drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" # eyel
-		drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" # eyer
+		[ -d "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" ] \
+			&& drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle"
+		[ -d "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" ] \
+			&& drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle"
 	}
 	[ "$SKIPMOUTH" ] || {
-		drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle"
+		[ -d "$1/$EMOTE/mouth/$mouthState/$baseAngle" ] \
+			&& drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle"
 	}
 	printf "\033[${H};${W}H"
 }
