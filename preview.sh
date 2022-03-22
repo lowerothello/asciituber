@@ -3,7 +3,7 @@
 # Reads state from a named pipe
 . ./asciituber.sh
 
-MODEL="$1"
+export MODEL="$1"
 tmpfile=/tmp/$$
 drawfile=/tmp/$$draw # tmpfile for the draw process
 mkfifo "$tmpfile" "$drawfile"
@@ -13,17 +13,22 @@ trap 'rm /tmp/$$* ; kill $drawprocpid ; exit' int kill # clean up the pipes
 
 [ "$MODEL" ] && initangles "$MODEL" 'base'
 
-delay=0.5
+# set this to the desired frametime (in seconds)
+DELAY=0.2
 
-baseAngle=idle
+export ANGLE=idle
+export VIEW=current
 
 # draw process
 (
 	while :
 	do
 		eval $(cat "$drawfile")
-		[ "$MODEL" ] && draw "$MODEL"
-		sleep $delay
+		[ "$VIEW" = "current" ] && {
+			[ "$MODEL" ] && angle "$ANGLE"
+		} || { # call the animation function
+			[ "$MODEL" ] && $VIEW
+		}
 	done
 ) &
 drawprocpid=$!
@@ -34,11 +39,14 @@ do
 	# echo "$pipeval"
 	case "$pipeval" in
 		'angle '*)
-			baseAngle="${pipeval#* }"
+			ANGLE="${pipeval#* }"
 			;;
 		'model '*)
 			MODEL="${pipeval#* }"
 			initangles "$MODEL" 'base'
+			;;
+		'view '*)
+			VIEW="${pipeval#* }"
 			;;
 	esac
 	set > "$drawfile"

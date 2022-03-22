@@ -11,7 +11,7 @@ Features:
 
 Simple Usage:
 -------------
-Run ./make to build the c components (a working compiler is required, you might need to install gcc or similar). Then send VRM data to localhost:39539 (the port can be changed at the top of ./vrm), and run ./vrm giving a model as an argument (eg. "models/test"). Any extra usage information can be found by reading the source code or by reading the error messages.
+A working compiler is required for the first run, you might need to install gcc or similar. Send VRM data to localhost:39539 (the port can be changed at the top of ./vrm), and run './vrm "models/test"'. Any extra usage information can be found by reading the source code or by reading the error messages.
 
 Models:
 -------
@@ -19,11 +19,17 @@ Example models are in ./models, they are free to use as bases or as is under the
 
 Scripts:
 --------
-- ./vrm          : reads vrm data from a port and draws the model
-- ./asciituber   : provides functions to draw and otherwise manipulate models
-- ./framecycle   : manually program a loop of frames, helps when making models to see how motion looks
-- ./genposnumbers: add a dummy file header to the text files, was used for migration to a new format, useless now
-- ./genbaseright : generates mirrored copies of symmetrical elements
+# USER FACING
+- ./vrm.sh          : reads vrm data from a port and draws the model
+- ./editmodel.sh    : repl to make editing models more managable
+- ./preview.sh      : shows a debug preview of the model, controlled with ./editmodel.sh, useful when editing models
+- ./make.sh         : builds the c components, needs to be run once
+# LIBRARIES
+- ./asciituber.sh   : provides functions to draw and otherwise manipulate models
+- ./animations.sh   : provides functions that program animations
+# HELPERS
+- ./genposnumbers.sh: add a dummy file header to the text files, was used for migration to a new format, useless now
+- ./genbaseright.sh : generates mirrored copies of symmetrical elements
 
 C Components:
 -------------

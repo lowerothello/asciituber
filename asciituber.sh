@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# a shell library, source this and use it's functions
+# a library, source this and use it's functions
 
 # starting state
 # --------------

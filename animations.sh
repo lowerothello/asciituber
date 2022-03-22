@@ -1,14 +1,14 @@
 #!/bin/sh -e
-# [$1 /path/to/model]
-. ./asciituber.sh
+# a library, source this and use it's functions
 
-model="$1"
-
-initangles "$model" 'base'
+# expects ./asciituber.sh to be sourced and initangles to have been run
+# expects the following to be set in the environment:
+# - $MODEL - the model to draw with
+# - $DELAY - the time in seconds to wait between draws, the frametime
 
 angle() {
-	baseAngle="$1" draw "$model"
-	sleep $delay
+	baseAngle="$1" draw "$MODEL"
+	sleep $DELAY
 }
 
 leftright() {
@@ -21,7 +21,7 @@ leftright() {
 	angle rght
 	angle rghtS
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 leftrightrectify() {
 	angle idle
@@ -29,7 +29,7 @@ leftrightrectify() {
 	angle lft
 	angle lftS
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 upleftright() {
 	angle up
@@ -41,7 +41,7 @@ upleftright() {
 	angle upRght
 	angle upRghtS
 	angle up
-	sleep $delay
+	sleep $DELAY
 }
 upleftrightrectify() {
 	angle up
@@ -49,7 +49,7 @@ upleftrightrectify() {
 	angle upLft
 	angle upLftS
 	angle up
-	sleep $delay
+	sleep $DELAY
 }
 dnleftright() {
 	angle dn
@@ -61,7 +61,7 @@ dnleftright() {
 	angle dnRght
 	angle dnRghtS
 	angle dn
-	sleep $delay
+	sleep $DELAY
 }
 dnleftrightrectify() {
 	angle dn
@@ -69,7 +69,7 @@ dnleftrightrectify() {
 	angle dnLft
 	angle dnLftS
 	angle dn
-	sleep $delay
+	sleep $DELAY
 }
 leftrightupdown() {
 	angle lftS
@@ -119,7 +119,7 @@ leftrightupdown() {
 	angle idle
 	angle dn
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 leftrightupdownrectify() {
 	angle lftS
@@ -145,21 +145,21 @@ leftrightupdownrectify() {
 	angle idle
 	angle dn
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 updown() {
 	angle up
 	angle idle
 	angle dn
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 simpletlt() {
 	angle tltLft
 	angle idle
 	angle tltRght
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 smallspin() {
 	angle lftS
@@ -172,7 +172,7 @@ smallspin() {
 	angle dnLftS
 	angle lftS
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 bigspin() {
 	angle lftS
@@ -191,7 +191,7 @@ bigspin() {
 	angle lft
 	angle lftS
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 diagonal() {
 	angle dnLftS
@@ -202,7 +202,7 @@ diagonal() {
 	angle upRght
 	angle upRghtS
 	angle idle
-	sleep $delay
+	sleep $DELAY
 }
 
 
@@ -217,7 +217,7 @@ tltleftright() {
 	angle tltLftRght
 	angle tltLftRghtS
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltupleftright() {
 	angle tltLftUp
@@ -229,7 +229,7 @@ tltupleftright() {
 	angle tltLftUpRght
 	angle tltLftUpRghtS
 	angle tltLftUp
-	sleep $delay
+	sleep $DELAY
 }
 tltdnleftright() {
 	angle tltLftDn
@@ -241,7 +241,7 @@ tltdnleftright() {
 	angle tltLftDnRght
 	angle tltLftDnRghtS
 	angle tltLftDn
-	sleep $delay
+	sleep $DELAY
 }
 tltleftrightupdown() {
 	angle tltLftLftS
@@ -291,14 +291,14 @@ tltleftrightupdown() {
 	angle tltLft
 	angle tltLftDn
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltupdown() {
 	angle tltLftUp
 	angle tltLft
 	angle tltLftDn
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltsmallspin() {
 	angle tltLftLftS
@@ -311,7 +311,7 @@ tltsmallspin() {
 	angle tltLftDnLftS
 	angle tltLftLftS
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltbigspin() {
 	angle tltLftLftS
@@ -330,7 +330,7 @@ tltbigspin() {
 	angle tltLftLft
 	angle tltLftLftS
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltdiagonal() {
 	angle tltLftDnLftS
@@ -341,7 +341,7 @@ tltdiagonal() {
 	angle tltLftUpRght
 	angle tltLftUpRghtS
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 tltdiagonal2() {
 	angle tltLftDnRghtS
@@ -352,7 +352,7 @@ tltdiagonal2() {
 	angle tltLftUpLft
 	angle tltLftUpLftS
 	angle tltLft
-	sleep $delay
+	sleep $DELAY
 }
 
 tltleftrightab() {
@@ -433,22 +433,3 @@ tltdnleftrightab() {
 	angle tltLftDnRghtS
 	angle dnRghtS
 }
-
-delay=0.2
-
-while :
-do
-	# updown
-	# simpletlt
-	# tltsmallspin
-	# tltbigspin
-	# tltdiagonal
-	# tltdiagonal2
-	# leftrightupdownrectify
-	# upleftrightrectify
-	# leftrightrectify
-	# dnleftrightrectify
-	# tltleftright
-	# tltdnleftrightab
-	angle idle
-done

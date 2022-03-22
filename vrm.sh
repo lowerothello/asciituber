@@ -20,12 +20,24 @@ BLINKFULL=10
 FRAMETIME=0.1
 
 
+# check requirements are present
 which oscdump >/dev/null || {
 	cat << EOF
 
 this program depends on oscdump!
 it's usually shipped with liblo.
 install it!
+
+EOF
+	exit 1
+}
+
+[ -x "./drawblock" ] || ./make.sh || {
+	cat << EOF
+
+failed to build the c components!
+make sure you have a working c compiler installed.
+if you're not using gcc, try setting \$CC to the name of your compiler.
 
 EOF
 	exit 1
