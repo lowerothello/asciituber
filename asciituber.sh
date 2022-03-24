@@ -35,29 +35,34 @@ framewidth() { # [$1 /path/to/frame/0]
 	fg= # dummy vars
 	bg= # "
 	attr= # "
+	fheight= # "
 	while IFS= read -r b # get state, nothing else
 	do
-		[ "$fg" ] || {
-			fg="$b"
-			continue
-		}
-		[ "$bg" ] || {
-			bg="$b"
-			continue
-		}
-		[ "$attr" ] || {
-			attr="$b"
-			continue
-		}
-		echo ${#b}
+		[ "$fg" ] || { fg=1; continue; }
+		[ "$bg" ] || { bg=1; continue; }
+		[ "$attr" ] || { attr=1; continue; }
+		[ "$fheight" ] || { fheight=1; continue; }
+
+		echo ${#b} # assume the top line of the ascii is full width
 		break
 	done < "$1"
 }
 frameheight() { # [$1 /path/to/frame/0]
-	echo "$(wc -l "$1")" | while read -r c _
+	row= # dummy vars
+	col= # "
+	fheight= # NOT a dummy
+	while IFS= read -r b # get state, nothing else
 	do
-		echo $((c - 3))
-	done
+		[ "$row" ] || { row=1; continue; }
+		[ "$col" ] || { col=1; continue; }
+		[ "$fheight" ] || { fheight="$b"; break; }
+	done < "${1%/*}/config" # makes the assumption that the frame we're measuring is in context
+
+	[ "$fheight" -gt 0 ] && {
+		echo "$fheight"
+	} || {
+		echo "$(($(wc -l < "$1") - 5))"
+	}
 }
 
 # min for 2 args
@@ -66,15 +71,12 @@ min2() {
 }
 
 # draw a block
-drawblockc() {
-	./drawblock "$@"
-}
-drawblock() { # [$1 /path/to/directory] [$2 debug line]
+drawblock() { # [$1 /path/to/directory] [$2 frame, indexed from 1]
 	[ -d "$1" ] || return 0
 
-	log=
 	row=
 	col=
+	filmheight=
 
 	# read the config file
 	while IFS= read -r line
@@ -90,31 +92,63 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 			[ $((col + X + MODX)) -gt $W ] && return # off the right side fully
 			continue
 		}
+		[ "$filmheight" ] || { filmheight="$line"; continue; }
 	done < "$1/config"
+
+	xpos=$((X + MODX + col))
+	ltrim=0
+	[ "$xpos" -le 0 ] && {
+		ltrim=$((xpos * -1 + 1))
+	}
 
 	for layer in "$1/"[0-9]
 	do
+		workinglineno="$lineno"
 		fg=
 		bg=
 		attr=
+		filmtime=
+		filmshownframe= # the film mode
+		if [ "$filmheight" -gt 0 ]
+		then
+			filmframecount="$((($(wc -l < "$layer") - 5) / filmheight))"
+			[ "$filmframecount" -lt 1 ] && filmframecount=1
+		else
+			filmframecount=1
+		fi
 
-		{ # TODO: can this be done per dir instead of per layer?
-			xpos=$((X + MODX + col))
-			ltrim=0
-			[ "$xpos" -le 0 ] && {
-				ltrim=$((xpos * -1 + 1))
-			}
-		}
+		drawnlines=0
+		processedlines=0
 
 		while IFS= read -r line
 		do
 			[ "$fg" ] || { fg="$line"; continue; }
 			[ "$bg" ] || { bg="$line"; continue; }
 			[ "$attr" ] || { attr="$line"; continue; }
+			[ "$filmtime" ] || { filmtime="$line"; continue; }
+			[ "$filmshownframe" ] || { # film mode
+				[ "$2" ] || { filmshownframe=1; continue; }
+				[ "$filmtime" -gt 0 ] || { filmshownframe=1; continue; }
+				case "$line" in
+					0)
+						filmshownframe="$(($(min2 "$2" $((filmframecount * filmtime))) / filmtime))"
+						;;
+					1)
+						filmshownframe="$((($2 % (filmframecount * filmtime)) / filmtime))"
+						;;
+				esac
+				continue
+			}
+			# printf "\033[H%s" "$2" # debug
 
-			[ "$lineno" -ge $H ] && break # finish before lines are drawn off screen, damage
-			if [ "$lineno" -ge 1 ] # start when the lines being drawn are on screen, damage
+			processedlines=$((processedlines + 1))
+			# burn through all the lines above the wanted frame if film frames are in use and a frame is given
+			[ "$filmshownframe" -ge 1 ] && [ "$processedlines" -le "$((filmshownframe * filmheight))" ] && continue
+			[ "$workinglineno" -ge $H ] && break # finish before lines are drawn off screen, damage
+			if [ "$workinglineno" -ge 1 ] # start when the lines being drawn are on screen, damage
 			then
+				drawnlines=$((drawnlines + 1))
+				[ "$filmheight" -gt 0 ] && [ "$drawnlines" -gt "$filmheight" ] && break # stop after drawing a full film frame
 				# trim off the left side for damage
 				[ $ltrim -gt 0 ] && {
 					line="$(echo "$line" | cut -c $ltrim-)"
@@ -127,61 +161,45 @@ drawblock() { # [$1 /path/to/directory] [$2 debug line]
 					[ $xpos -lt 0 ] && trimwidth=$((trimwidth + xpos - 1))
 					# print the block
 
-					# a debug option, probably don't touch
-					# in an ideal world everything would be drawn linewise, but it's buggy
-					# true for charwise drawing  (complex but proper formatting and overlapping)
-					# false for linewise drawing (simpler but inherent overwriting so no bgcol support)
-					# set this to true unless it runs too slowly or smth and your model is super simple
-					true && {
-						# set the text formatting opts
-						printf '\033[%sm\033[38;5;%sm\033[48;5;%sm' "$attr" "$fg" "$bg"
-						strptr=0
-						# read -n isn't posix, but dd is far too slow for this
-						# allow the posix version if it's really wanted
-						common() {
-							strptr=$((strptr + 1))
-							[ "$strptr" -gt "$trimwidth" ] && break
-							[ "$char" = " " ] || {
-								printf "\033[$((lineno));$((xpos + strptr - 1))H%s" "$char"
-							}
-							:
+					# set the text formatting opts
+					printf '\033[%sm\033[38;5;%sm\033[48;5;%sm' "$attr" "$fg" "$bg"
+					strptr=0
+					# read -n isn't posix, but dd is far too slow for this
+					# allow the posix version if it's really wanted
+					common() {
+						strptr=$((strptr + 1))
+						[ "$strptr" -gt "$trimwidth" ] && break
+						[ "$char" = " " ] || {
+							printf "\033[$((workinglineno));$((xpos + strptr - 1))H%s" "$char"
 						}
-						[ "$POSIXLY_CORRECT" ] && {
-							while :
-							do
-								char="$(printf '%s' "$line" | dd count=1 bs=1 2>/dev/null)"
-								[ "$char" ] || break
-								line="${line#"$char"}"
-								common
-							done
-							[ "$HIDEWARNINGS" ] || {
-								printf '\033[H [POSIXLY_CORRECT, DO \033[3mNOT\033[m REPORT SPEED ISSUES]
- [hide this message by setting $HIDEWARNINGS]\033[H'
-							}
-						} || {
-							printf '%s' "$line" | while IFS= read -rn1 char
-							do
-								common
-							done
-						}
-						# unset the text formatting opts
-						printf '\033[m'
-					} || {
-						printf "\033[$((lineno));$((xpos + 1))H\033[%sm\033[38;5;%sm%.*s\n" "$attr" "$fg" "$trimwidth" "$line"
-						# \033[${trimwidth}X # block clearing snippet, if required (needed before but it just doesn't anymore? not sure)
+						:
 					}
+					[ "$POSIXLY_CORRECT" ] && {
+						while :
+						do
+							char="$(printf '%s' "$line" | dd count=1 bs=1 2>/dev/null)"
+							[ "$char" ] || break
+							line="${line#"$char"}"
+							common
+						done
+					} || {
+						printf '%s' "$line" | while IFS= read -rn1 char
+						do
+							common
+						done
+					}
+					# unset the text formatting opts
+					printf '\033[m'
 				}
 			fi
-			lineno=$((lineno + 1))
-			[ $log ] && [ $2 ] || { # debug printing
-				log=1
-				[ "$2" ] && {
-					printf "\033[$((H + $2));1H%s" "$row $col"
-				}
-			}
+			workinglineno=$((workinglineno + 1))
 		done < "$layer"
 	done
 	return 0
+}
+drawblockc() {
+	./drawblock "$@"
+	# drawblock "$@"
 }
 
 # primitive way to work with floats in a language that doesn't support them
@@ -402,7 +420,8 @@ setblink() { # [$1 eye] [$2 value]
 }
 
 # draw the current state
-draw() { # [$1 /path/to/model]
+draw() { # [$1 /path/to/model] [ $2 frame (indexed from 1) ]
+	frame="${2:-1}"
 	# clear the screen
 	printf "\033[2J\033[H"
 	# draw the base
@@ -422,16 +441,16 @@ draw() { # [$1 /path/to/model]
 		done
 	}
 	[ -d "$1/$EMOTE/base/$baseAngle" ] \
-		&& drawblockc "$1/$EMOTE/base/$baseAngle"
+		&& drawblockc "$1/$EMOTE/base/$baseAngle" "$frame"
 	[ "$SKIPEYES" ] || {
 		[ -d "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" ] \
-			&& drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle"
+			&& drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" "$frame"
 		[ -d "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" ] \
-			&& drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle"
+			&& drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" "$frame"
 	}
 	[ "$SKIPMOUTH" ] || {
 		[ -d "$1/$EMOTE/mouth/$mouthState/$baseAngle" ] \
-			&& drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle"
+			&& drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle" "$frame"
 	}
 	printf "\033[${H};${W}H"
 }

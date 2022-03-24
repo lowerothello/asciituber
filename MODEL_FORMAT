@@ -155,10 +155,11 @@ format:
 	/config:
 		line1: row offset (for all files)
 		line2: column offset (for all files)
+		line3: filmreel frame height (for all files, see FILMREEL for more info)
 	/LAYERNUMBER:
 		line1: fg color (7 for default)
 		line2: bg color (0 for default)
-		line3: attribute (
+		line3: mode / attribute (
 			0:normal
 			1:bold
 			2:faint
@@ -168,12 +169,23 @@ format:
 			7:swap fg/bg (probably useless)
 			9:strike
 		)
+		line4: filmreel frame time } see FILMREEL for more info
+		line5: filmreel mode       }
 		rest: ascii art
 
 LAYERNUMBER: a number, higher numbers are drawn later, 0-9
 
 - Whitespace leaves what's already on the screen alone and is not coloured
-- Explicitly coloured whitespace is possible by using a layer where fg=bg
-  and any character OTHER than whitespace will appear as coloured whitespace
+- Explicitly coloured whitespace is possible by using a layer where fg=bg and any character OTHER than whitespace will appear as coloured whitespace
+
+FILMREEL:
+The way to do per-frame animation, named after physical reels of video film cos files using this feature look kinda like film if you squint hard enough (a sequence of cells going down the film / file).
+This feature can be turned off by just zeroing out all the options (zero frame height for only one frame, zero frame time to disable animation for just the one layer).
+FILMREEL OPTIONS:
+- frame height: the number of lines each frame takes up
+- frame time  : the number of master frames ($DELAY) that each frame is shown for
+- mode        : the mode to use
+'             - 0: play once when the frame is shown (eg. hair swishes or jiggle physics on motion)
+'             - 1: loop forever
 
 # vim: wrap

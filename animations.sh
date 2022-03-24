@@ -6,9 +6,15 @@
 # - $MODEL - the model to draw with
 # - $DELAY - the time in seconds to wait between draws, the frametime
 
-angle() {
-	baseAngle="$1" draw "$MODEL"
+show() { # dumb way to draw an angle
+	baseAngle="$1" draw "$MODEL" "$FRAME"
+	# printf '\033[H%s' "$FRAME"
 	sleep $DELAY
+	FRAME="$((FRAME+1))"
+}
+angle() { # wrap show and try to show a new angle smartly
+	export FRAME=1
+	show "$1"
 }
 
 leftright() {

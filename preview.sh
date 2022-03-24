@@ -2,14 +2,15 @@
 # [$1 /path/to/model]
 # Reads state from a named pipe
 . ./asciituber.sh
+. ./animations.sh
 
 export MODEL="$1"
 tmpfile=/tmp/$$
 drawfile=/tmp/$$draw # tmpfile for the draw process
-mkfifo "$tmpfile" "$drawfile"
+mkfifo "$tmpfile"
 echo $$
 
-trap 'rm /tmp/$$* ; kill $drawprocpid ; exit' int kill # clean up the pipes
+trap 'kill $drawprocpid ; rm /tmp/$$* ; exit' int kill # clean up pipes & crocs
 
 [ "$MODEL" ] && initangles "$MODEL" 'base'
 
@@ -18,17 +19,22 @@ DELAY=0.2
 
 export ANGLE=idle
 export VIEW=current
+export FRAME=1
 
 # draw process
 (
 	while :
 	do
-		eval $(cat "$drawfile")
-		[ "$VIEW" = "current" ] && {
-			[ "$MODEL" ] && angle "$ANGLE"
-		} || { # call the animation function
-			[ "$MODEL" ] && $VIEW
+		[ -f "$drawfile" ] && { # try to only set state once
+			eval $(cat "$drawfile")
+			rm "$drawfile"
 		}
+		if [ "$VIEW" = "current" ]
+		then
+			[ "$MODEL" ] && show "$ANGLE" || sleep "$DELAY"
+		else # call the animation function
+			[ "$MODEL" ] && $VIEW || sleep "$DELAY"
+		fi
 	done
 ) &
 drawprocpid=$!
@@ -36,10 +42,12 @@ drawprocpid=$!
 while :
 do
 	pipeval="$(cat "$tmpfile")"
+	unset FRAME
 	# echo "$pipeval"
 	case "$pipeval" in
 		'angle '*)
 			ANGLE="${pipeval#* }"
+			[ "$VIEW" = "current" ] && FRAME=1
 			;;
 		'model '*)
 			MODEL="${pipeval#* }"
@@ -47,6 +55,7 @@ do
 			;;
 		'view '*)
 			VIEW="${pipeval#* }"
+			FRAME=1
 			;;
 	esac
 	set > "$drawfile"

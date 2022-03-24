@@ -17,9 +17,9 @@ previewpid="$(pidof preview.sh)"
 previewpid="${previewpid##* }" # only get the last pid, the first one is the draw proc
 printf 'connecting to %s..\n' "${previewpid}"
 echo "angle $angle" > /tmp/$previewpid
-sleep 0.1
+sleep 0.2
 echo "model $model" > /tmp/$previewpid
-sleep 0.1
+sleep 0.2
 
 while :
 do
