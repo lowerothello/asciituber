@@ -10,8 +10,8 @@ export RBLINK=0
 
 # user adjustable offset and trimming
 # set AUTO to automatically centre
-export AUTO=1
-export X=0
+export AUTO=
+export X=1
 export Y=0
 export W=80
 export H=24
@@ -71,135 +71,8 @@ min2() {
 }
 
 # draw a block
-drawblock() { # [$1 /path/to/directory] [$2 frame, indexed from 1]
-	[ -d "$1" ] || return 0
-
-	row=
-	col=
-	filmheight=
-
-	# read the config file
-	while IFS= read -r line
-	do
-		[ "$row" ] || {
-			row="$line"
-			lineno=$((row + Y + MODY))
-			[ $lineno -gt $H ] && return # off the bottom fully
-			continue
-		}
-		[ "$col" ] || {
-			col="$line"
-			[ $((col + X + MODX)) -gt $W ] && return # off the right side fully
-			continue
-		}
-		[ "$filmheight" ] || { filmheight="$line"; continue; }
-	done < "$1/config"
-
-	xpos=$((X + MODX + col))
-	ltrim=0
-	[ "$xpos" -le 0 ] && {
-		ltrim=$((xpos * -1 + 1))
-	}
-
-	for layer in "$1/"[0-9]
-	do
-		workinglineno="$lineno"
-		fg=
-		bg=
-		attr=
-		filmtime=
-		filmshownframe= # the film mode
-		if [ "$filmheight" -gt 0 ]
-		then
-			filmframecount="$((($(wc -l < "$layer") - 5) / filmheight))"
-			[ "$filmframecount" -lt 1 ] && filmframecount=1
-		else
-			filmframecount=1
-		fi
-
-		drawnlines=0
-		processedlines=0
-
-		while IFS= read -r line
-		do
-			[ "$fg" ] || { fg="$line"; continue; }
-			[ "$bg" ] || { bg="$line"; continue; }
-			[ "$attr" ] || { attr="$line"; continue; }
-			[ "$filmtime" ] || { filmtime="$line"; continue; }
-			[ "$filmshownframe" ] || { # film mode
-				[ "$2" ] || { filmshownframe=1; continue; }
-				[ "$filmtime" -gt 0 ] || { filmshownframe=1; continue; }
-				case "$line" in
-					0)
-						filmshownframe="$(($(min2 "$2" $((filmframecount * filmtime))) / filmtime))"
-						;;
-					1)
-						filmshownframe="$((($2 % (filmframecount * filmtime)) / filmtime))"
-						;;
-				esac
-				continue
-			}
-			# printf "\033[H%s" "$2" # debug
-
-			processedlines=$((processedlines + 1))
-			# burn through all the lines above the wanted frame if film frames are in use and a frame is given
-			[ "$filmshownframe" -ge 1 ] && [ "$processedlines" -le "$((filmshownframe * filmheight))" ] && continue
-			[ "$workinglineno" -ge $H ] && break # finish before lines are drawn off screen, damage
-			if [ "$workinglineno" -ge 1 ] # start when the lines being drawn are on screen, damage
-			then
-				drawnlines=$((drawnlines + 1))
-				[ "$filmheight" -gt 0 ] && [ "$drawnlines" -gt "$filmheight" ] && break # stop after drawing a full film frame
-				# trim off the left side for damage
-				[ $ltrim -gt 0 ] && {
-					line="$(echo "$line" | cut -c $ltrim-)"
-				}
-
-				[ ${#line} -le 0 ] || { # damage for off the left
-					# for trimming off the right side
-					trimwidth=$(min2 $((${#line} + ltrim)) $((W - col - MODX)))
-					# width mod in case we're trimming off the left side, clears 1 extra column cos the xpos is 0 instead of 1
-					[ $xpos -lt 0 ] && trimwidth=$((trimwidth + xpos - 1))
-					# print the block
-
-					# set the text formatting opts
-					printf '\033[%sm\033[38;5;%sm\033[48;5;%sm' "$attr" "$fg" "$bg"
-					strptr=0
-					# read -n isn't posix, but dd is far too slow for this
-					# allow the posix version if it's really wanted
-					common() {
-						strptr=$((strptr + 1))
-						[ "$strptr" -gt "$trimwidth" ] && break
-						[ "$char" = " " ] || {
-							printf "\033[$((workinglineno));$((xpos + strptr - 1))H%s" "$char"
-						}
-						:
-					}
-					[ "$POSIXLY_CORRECT" ] && {
-						while :
-						do
-							char="$(printf '%s' "$line" | dd count=1 bs=1 2>/dev/null)"
-							[ "$char" ] || break
-							line="${line#"$char"}"
-							common
-						done
-					} || {
-						printf '%s' "$line" | while IFS= read -rn1 char
-						do
-							common
-						done
-					}
-					# unset the text formatting opts
-					printf '\033[m'
-				}
-			fi
-			workinglineno=$((workinglineno + 1))
-		done < "$layer"
-	done
-	return 0
-}
-drawblockc() {
+drawblock() {
 	./drawblock "$@"
-	# drawblock "$@"
 }
 
 # primitive way to work with floats in a language that doesn't support them
@@ -441,16 +314,16 @@ draw() { # [$1 /path/to/model] [ $2 frame (indexed from 1) ]
 		done
 	}
 	[ -d "$1/$EMOTE/base/$baseAngle" ] \
-		&& drawblockc "$1/$EMOTE/base/$baseAngle" "$frame"
+		&& drawblock "$1/$EMOTE/base/$baseAngle" "$frame"
 	[ "$SKIPEYES" ] || {
 		[ -d "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" ] \
-			&& drawblockc "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" "$frame"
+			&& drawblock "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" "$frame"
 		[ -d "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" ] \
-			&& drawblockc "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" "$frame"
+			&& drawblock "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" "$frame"
 	}
 	[ "$SKIPMOUTH" ] || {
 		[ -d "$1/$EMOTE/mouth/$mouthState/$baseAngle" ] \
-			&& drawblockc "$1/$EMOTE/mouth/$mouthState/$baseAngle" "$frame"
+			&& drawblock "$1/$EMOTE/mouth/$mouthState/$baseAngle" "$frame"
 	}
 	printf "\033[${H};${W}H"
 }

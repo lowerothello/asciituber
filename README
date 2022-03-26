@@ -33,7 +33,7 @@ Scripts:
 
 C Components:
 -------------
-- ./drawblock.c  : reimplementation of the shell function "drawblock" for speed, mapped to "drawblockc"
+- ./drawblock.c  : mapped to the shell function "drawblock"
 
 
 # vim: wrap
