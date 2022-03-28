@@ -15,7 +15,7 @@ trap 'kill $drawprocpid ; rm /tmp/$$* ; exit' int kill # clean up pipes & crocs
 [ "$MODEL" ] && initangles "$MODEL" 'base'
 
 # set this to the desired frametime (in seconds)
-DELAY=0.2
+DELAY=0.5
 
 export ANGLE=idle
 export VIEW=current

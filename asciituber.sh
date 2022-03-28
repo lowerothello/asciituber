@@ -10,11 +10,11 @@ export RBLINK=0
 
 # user adjustable offset and trimming
 # set AUTO to automatically centre
-export AUTO=
-export X=1
-export Y=0
-export W=80
-export H=24
+export AUTO= # 1
+export X=-12 # 1
+export Y=-35 # 0
+export W=200 # 80
+export H=48 # 24
 
 # USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
 # mod offset, offsets the puppet
