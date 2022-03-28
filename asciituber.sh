@@ -11,8 +11,8 @@ export RBLINK=0
 # user adjustable offset and trimming
 # set AUTO to automatically centre
 export AUTO= # 1
-export X=-12 # 1
-export Y=-35 # 0
+export X=1 # 1
+export Y=0 # 0
 export W=200 # 80
 export H=48 # 24
 
