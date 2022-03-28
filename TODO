@@ -2,7 +2,6 @@
 
 - drawblock
 -- XYWH are a bit broken, W doesn't account for X offset properly
--- inverted colours in a sane way, add a layer where if a char is present then the output should be inverted
 -- glitch effects (more motion to feel less stationary, and to lean into the aesthetic)
 --- chrommatic abberation type beat (layers drifting independantly)
 --- cell colour invert triggerred by noise

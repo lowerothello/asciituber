@@ -23,17 +23,17 @@ Scripts:
 - ./vrm.sh          : reads vrm data from a port and draws the model
 - ./editmodel.sh    : repl to make editing models more managable
 - ./preview.sh      : shows a debug preview of the model, controlled with ./editmodel.sh, useful when editing models
-- ./make.sh         : builds the c components, needs to be run once
+- ./make.sh         : builds the c components, needs to be run once before use
 # LIBRARIES
 - ./asciituber.sh   : provides functions to draw and otherwise manipulate models
-- ./animations.sh   : provides functions that program animations
+- ./animations.sh   : provides pre-programmed animations (just test animations rn)
 # HELPERS
 - ./genposnumbers.sh: add a dummy file header to the text files, was used for migration to a new format, useless now
 - ./genbaseright.sh : generates mirrored copies of symmetrical elements
 
 C Components:
 -------------
-- ./drawblock.c  : mapped to the shell function "drawblock"
+- ./drawblock.c     : mapped to the shell function "drawblock"
 
 
 # vim: wrap

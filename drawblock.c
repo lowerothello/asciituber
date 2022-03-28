@@ -6,7 +6,7 @@
 
 #define STR_LEN 1024
 
-struct S {
+struct state {
 	int X;
 	int Y;
 	int H;
@@ -15,10 +15,12 @@ struct S {
 	int MODY;
 	char path[STR_LEN];
 	char buffer[STR_LEN];
+	char invertbuffer[STR_LEN];
 	int row;
 	int col;
 	int filmheight;
 	int frame;
+	FILE *invertlayer;
 } s;
 
 int min(int a, int b) {
@@ -41,7 +43,7 @@ int linecount(char* filename, char* buffer) {
 	return lc;
 }
 
-void drawlayer (struct S s) {
+void drawlayer (struct state) {
 	FILE *layer = fopen(s.path, "r");
 	if (layer == NULL) {
 		return;
@@ -78,12 +80,16 @@ void drawlayer (struct S s) {
 		}
 	}
 
+	/* read metalayers */
+	if (s.invertlayer) fseek(s.invertlayer, 0, SEEK_SET);
+
 	int drawnlines = 0;
 	int processedlines = 0;
-	
 	int trimwidth;
 	int i;
 	while (fgets(s.buffer, STR_LEN, layer)) {
+		if (s.invertlayer) fgets(s.invertbuffer, STR_LEN, s.invertlayer);
+
 		/* burn through lines until the wanted frame is queued */
 		processedlines++;
 		if (filmshownframe >= 1 && processedlines <= (filmshownframe * s.filmheight)) continue;
@@ -95,7 +101,10 @@ void drawlayer (struct S s) {
 			if (s.filmheight > 0 && drawnlines > s.filmheight) break;
 
 			/* trim off the left side */
-			if (ltrim > 0) memmove(s.buffer, s.buffer+ltrim, strlen(s.buffer));
+			if (ltrim > 0) {
+				memmove(s.buffer, s.buffer+ltrim, strlen(s.buffer));
+				if (s.invertlayer) memmove(s.invertbuffer, s.invertbuffer+ltrim, strlen(s.invertbuffer));
+			}
 			if (strlen(s.buffer) > 0) {
 				/* for trimming off the right side later */
 				trimwidth = min(strlen(s.buffer) + ltrim, s.W - s.col - s.MODX);
@@ -107,8 +116,13 @@ void drawlayer (struct S s) {
 				printf("\033[%dm\033[38;5;%dm\033[48;5;%dm", attr, fg, bg);
 				// draw the block
 				for (i = 0; i < min(strlen(s.buffer), trimwidth); i++) {
-					if (s.buffer[i] != ' ')
-						printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
+					if (s.buffer[i] != ' ') {
+						if (s.invertlayer && s.invertbuffer[i] && s.invertbuffer[i] != ' ') {
+							printf("\033[38;5;%dm\033[48;5;%dm", bg, fg);
+							printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
+							printf("\033[38;5;%dm\033[48;5;%dm", fg, bg);
+						} else printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
+					}
 				}
 				// unset text formatting opt
 				printf("\033[m");
@@ -153,6 +167,10 @@ int main(int argc, char *argv[]) {
 
 	fclose(config);
 
+	/* META LAYERS */
+	strcpy(s.path, argv[1]);
+	s.invertlayer = fopen(strcat(s.path, "/invert"), "r");
+
 	/* LAYER FILES */
 	s.frame = atoi(argv[2]);
 	strcpy(s.path, argv[1]); strcat(s.path, "/0"); drawlayer(s);
@@ -166,5 +184,7 @@ int main(int argc, char *argv[]) {
 	strcpy(s.path, argv[1]); strcat(s.path, "/8"); drawlayer(s);
 	strcpy(s.path, argv[1]); strcat(s.path, "/9"); drawlayer(s);
 
+	if (s.invertlayer)
+		fclose(s.invertlayer);
 	return 0;
 }

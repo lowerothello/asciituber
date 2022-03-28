@@ -16,7 +16,7 @@ export Y=-35 # 0
 export W=200 # 80
 export H=48 # 24
 
-# USED AND CHANGED INTERNALLY, NO TOUCHY TOUCHY
+# internal definitions
 # mod offset, offsets the puppet
 export MODX=0
 export MODY=0
