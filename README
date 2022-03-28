@@ -28,7 +28,6 @@ Scripts:
 - ./asciituber.sh   : provides functions to draw and otherwise manipulate models
 - ./animations.sh   : provides pre-programmed animations (just test animations rn)
 # HELPERS
-- ./genposnumbers.sh: add a dummy file header to the text files, was used for migration to a new format, useless now
 - ./genbaseright.sh : generates mirrored copies of symmetrical elements
 
 C Components:
@@ -36,4 +35,4 @@ C Components:
 - ./drawblock.c     : mapped to the shell function "drawblock"
 
 
-# vim: wrap
+vim: wrap

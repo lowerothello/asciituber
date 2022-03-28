@@ -1,13 +1,13 @@
 - rely less on relative dirs, calling asciituber from any directory other than . breaks things
 
 - drawblock
--- XYWH are a bit broken, W doesn't account for X offset properly
--- glitch effects (more motion to feel less stationary, and to lean into the aesthetic)
---- chrommatic abberation type beat (layers drifting independantly)
---- cell colour invert triggerred by noise
+|
+|- XYWH are a bit broken, W doesn't account for X offset properly
+|
+|- glitch effects (more motion to feel less stationary, and to lean into the aesthetic)
+|'- chrommatic abberation type beat (layers drifting independantly)
+|'- cell colour invert triggerred by noise
+|
+'- a way to draw different film animations depending on what the previous angle was
 
-- preview changes
--- keybinds
---- panning
-
-# vim: wrap
+vim: wrap

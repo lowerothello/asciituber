@@ -196,4 +196,4 @@ This feature can be turned off by just ignoring it, and not providing the layer 
 INVERTLAYER HEADER:
 - no options currently
 
-# vim: wrap
+vim: wrap
