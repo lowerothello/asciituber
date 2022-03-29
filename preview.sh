@@ -5,13 +5,16 @@
 . ./animations.sh
 
 export MODEL="$1"
-tmpfile=/tmp/$$
+tmpfile=/tmp/$$ # unix pipe, reads external commands
 pipefile=/tmp/$$pipe # pipe watching process state dump
 inputfile=/tmp/$$input # input process state dump, only contains relevant things
 mkfifo "$tmpfile"
 echo $$
 
-trap 'kill $drawprocpid $pipewatchpid ; rm /tmp/$$* ; exit' int kill # clean up pipes & crocs
+trap 'printf "\033[?25h"; kill $drawprocpid $pipewatchpid; rm /tmp/$$*; exit' int kill # clean up pipes & crocs
+
+# hide the cursor
+printf '\033[?25l'
 
 [ "$MODEL" ] && initangles "$MODEL" 'base'
 

@@ -50,7 +50,7 @@ void drawlayer (struct state) {
 	}
 
 	int lineno = s.row + s.Y + s.MODY; /* reset lineno */
-	int xpos = s.X + s.MODX + s.col;
+	int xpos = s.col + s.X + s.MODX;
 	int ltrim = 0;
 	if (xpos <= 0)
 		ltrim = xpos * -1 + 1;
@@ -85,7 +85,6 @@ void drawlayer (struct state) {
 
 	int drawnlines = 0;
 	int processedlines = 0;
-	int trimwidth;
 	int i;
 	while (fgets(s.buffer, STR_LEN, layer)) {
 		if (s.invertlayer) fgets(s.invertbuffer, STR_LEN, s.invertlayer);
@@ -94,28 +93,17 @@ void drawlayer (struct state) {
 		processedlines++;
 		if (filmshownframe >= 1 && processedlines <= (filmshownframe * s.filmheight)) continue;
 
-		if (lineno >= s.H) break; /* finish before lines are drawn off screen */
+		if (lineno > s.H) break; /* finish before lines are drawn off screen */
 		if (lineno >= 1) { /* start when lines are being drawn on screen */
 			/* stop after drawing a full frame */
 			drawnlines++;
 			if (s.filmheight > 0 && drawnlines > s.filmheight) break;
 
-			/* trim off the left side */
-			if (ltrim > 0) {
-				memmove(s.buffer, s.buffer+ltrim, strlen(s.buffer));
-				if (s.invertlayer) memmove(s.invertbuffer, s.invertbuffer+ltrim, strlen(s.invertbuffer));
-			}
-			if (strlen(s.buffer) > 0) {
-				/* for trimming off the right side later */
-				trimwidth = min(strlen(s.buffer) + ltrim, s.W - s.col - s.MODX);
-				/* width mod in case we're trimming off the left side
-				magic number 1 is cos the xpos is 0 instead of 1 */
-				if (xpos < 0) trimwidth = trimwidth + xpos - 1;
-
-				// set text formatting opts
-				printf("\033[%dm\033[38;5;%dm\033[48;5;%dm", attr, fg, bg);
-				// draw the block
-				for (i = 0; i < min(strlen(s.buffer), trimwidth); i++) {
+			// set text formatting opts
+			printf("\033[%dm\033[38;5;%dm\033[48;5;%dm", attr, fg, bg);
+			// draw the block
+			for (i = 0; i < strlen(s.buffer); i++) {
+				if (xpos + i > s.X && xpos + i < s.X + s.W) {
 					if (s.buffer[i] != ' ') {
 						if (s.invertlayer && s.invertbuffer[i] && s.invertbuffer[i] != ' ') {
 							printf("\033[38;5;%dm\033[48;5;%dm", bg, fg);
@@ -124,9 +112,9 @@ void drawlayer (struct state) {
 						} else printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
 					}
 				}
-				// unset text formatting opt
-				printf("\033[m");
 			}
+			// unset text formatting opt
+			printf("\033[m");
 		}
 		lineno++;
 	}

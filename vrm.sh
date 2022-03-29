@@ -15,9 +15,8 @@ TILTSLIGHT=8
 BLINKHALF=3
 BLINKFULL=10
 
-# seconds each frame should be shown for
-# use for "smoothing" and managing cpu usage by the draw thread
-FRAMETIME=0.1
+# set this to the desired frametime (in seconds)
+DELAY=0.05
 
 
 # check requirements are present
@@ -43,20 +42,25 @@ EOF
 	exit 1
 }
 
+trap 'printf "\033[?25h"; kill $subshellpid' int kill
+# hide the cursor
+printf '\033[?25l'
+
 initangles "$1" 'base'
 initangles "$1" 'base'
+
 # draw process
 (
 	while :
 	do
-		# reset new state (shell is jank for this)
+		# update state
 		eval $(cat "$tmpfile")
 		draw "$1"
-		sleep $FRAMETIME
+		sleep $DELAY
 	done
 ) &
 subshellpid=$!
-trap "kill $subshellpid" int kill
+
 # update thread
 oscdump $PORT | while read -r timestamp address types arg1 argv
 do
@@ -90,7 +94,7 @@ do
 			esac
 			;;
 		"/VMC/Ext/Blend/Apply")
-			# dump new state (shell is jank for this)
+			# dump state
 			set > "$tmpfile"
 			;;
 	esac
