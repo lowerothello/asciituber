@@ -14,7 +14,7 @@ export AUTO= # 1
 export X=1 # 1
 export Y=0 # 0
 export W=$(tput cols) # 80
-export H=$(($(tput lines) - 1)) # 24
+export H=$(($(tput lines) - 2)) # 24
 
 # internal definitions
 # mod offset, offsets the puppet
@@ -66,12 +66,12 @@ frameheight() { # [$1 /path/to/frame/0]
 }
 
 # min for 2 args
-min2() {
+min2() { # [$1 arg1] [$2 arg2]
 	[ $1 -lt $2 ] && echo $1 || echo $2
 }
 
 # draw a block
-drawblock() {
+drawblock() { # [$1 /path/to/block] [$2 animation frame]
 	./drawblock "$@"
 }
 
@@ -90,12 +90,12 @@ float() { # [$1 float] [$2 modifier] [$3 type]
 	case "$3" in
 		1)
 			f="${f#??}" # trim first 2 chars
-			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr)
+			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr, so they're removed)
 			f="${f%????}" # trim last 4 chars
 			;;
 		2)
 			f="${f%???????}${f#??}" # remove the dot in the most roundabout way possible
-			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr)
+			f="$((${f#${f%%[!0]*}} * $2))" # multiply (leading zeroes confuse expr, so they're removed)
 			f="${f%?????}" # trim last 5 chars
 			;;
 		*)
@@ -293,37 +293,39 @@ setblink() { # [$1 eye] [$2 value]
 }
 
 # draw the current state
-draw() { # [$1 /path/to/model] [ $2 frame (indexed from 1) ]
-	frame="${2:-1}"
+draw() { # [$1 frame (indexed from 1)]
+	frame="${1:-1}"
+
 	# clear the screen
 	printf "\033[2J\033[H"
-	# draw the base
-	# echo $baseAngle $baseAngle_upLftS
-	export eyelAngle=idle # TODO: gen properly instead of hardcoding
+
+	# TODO: gen properly instead of hardcoding
+	export eyelAngle=idle
 	export eyerAngle=$eyelAngle
 	export mouthState=closed
+
 	[ "$AUTO" ] && {
 		W=$(tput cols)
 		H=$(tput lines)
 		# for loop to enumerate the first text file
-		for k in "$1/$EMOTE/base/$baseAngle/"[0-9]
+		for k in "$MODEL/$EMOTE/base/$baseAngle/"[0-9]
 		do
 			X=$(((W - $(framewidth "$k")) / 2 - 1)) # 1: magic number, seems to line it up right
 			Y=$(((H - $(frameheight "$k")) / 2))
 			break
 		done
 	}
-	[ -d "$1/$EMOTE/base/$baseAngle" ] \
-		&& drawblock "$1/$EMOTE/base/$baseAngle" "$frame"
+	[ -d "$MODEL/$EMOTE/base/$baseAngle" ] \
+		&& drawblock "$MODEL/$EMOTE/base/$baseAngle" "$frame"
 	[ "$SKIPEYES" ] || {
-		[ -d "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" ] \
-			&& drawblock "$1/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" "$frame"
-		[ -d "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" ] \
-			&& drawblock "$1/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" "$frame"
+		[ -d "$MODEL/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" ] \
+			&& drawblock "$MODEL/$EMOTE/eyel/$eyelState/$baseAngle/$eyelAngle" "$frame"
+		[ -d "$MODEL/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" ] \
+			&& drawblock "$MODEL/$EMOTE/eyer/$eyerState/$baseAngle/$eyerAngle" "$frame"
 	}
 	[ "$SKIPMOUTH" ] || {
-		[ -d "$1/$EMOTE/mouth/$mouthState/$baseAngle" ] \
-			&& drawblock "$1/$EMOTE/mouth/$mouthState/$baseAngle" "$frame"
+		[ -d "$MODEL/$EMOTE/mouth/$mouthState/$baseAngle" ] \
+			&& drawblock "$MODEL/$EMOTE/mouth/$mouthState/$baseAngle" "$frame"
 	}
 	printf "\033[${H};${W}H"
 }

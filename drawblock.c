@@ -66,7 +66,7 @@ void drawlayer (struct state) {
 	/* read the layer's header */
 	fgets(s.buffer, STR_LEN, layer); int fg = atoi(s.buffer);
 	fgets(s.buffer, STR_LEN, layer); int bg = atoi(s.buffer);
-	fgets(s.buffer, STR_LEN, layer); int attr = atoi(s.buffer);
+	fgets(s.buffer, STR_LEN, layer); char attr[STR_LEN]; strcpy(attr, s.buffer);
 	fgets(s.buffer, STR_LEN, layer); int filmtime = atoi(s.buffer);
 	/* filmshownframe is more complex than the above few */
 	int filmshownframe;
@@ -100,15 +100,15 @@ void drawlayer (struct state) {
 			if (s.filmheight > 0 && drawnlines > s.filmheight) break;
 
 			// set text formatting opts
-			printf("\033[%d;3%d;4%dm", attr, fg, bg);
+			printf("\033[%s;3%d;4%dm", attr, fg, bg);
 			// draw the block
 			for (i = 0; i < strlen(s.buffer); i++) {
 				if (xpos + i > s.X && xpos + i < s.X + s.W) {
 					if (s.buffer[i] != ' ') {
 						if (s.invertlayer && s.invertbuffer[i] && s.invertbuffer[i] != ' ') {
-							printf("\033[%d;3%d;4%dm", attr, bg, fg);
+							printf("\033[%s;7;3%d;4%dm", attr, fg, bg); /* add the invert attribute */
 							printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
-							printf("\033[%d;3%d;4%dm", attr, fg, bg);
+							printf("\033[%s;3%d;4%dm", attr, fg, bg); /* remove the invert attribute */
 						} else printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
 					}
 				}

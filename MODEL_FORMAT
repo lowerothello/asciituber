@@ -2,17 +2,22 @@ MODEL FORMAT
 ------------
 Documentation for working with asciituber models
 
+
 File Structure:
 ---------------
-The root contains
-- mirrorlist: a file telling the program which layers are symmetrical and should be mirrored, see "Mirrorlist:" for more info
-- $EMOTE/   : not fully implemented yet, only "idle" is read
-- - $LAYER/ : each layer to be drawn, see "Layers:" for more info
-- - -       : anything deeper depends on the layer, see "Layers:"
+The root contains:
+| PATH         | DESC
++--------------+----------------------------------------------------
+| mirrorlist   | see "Mirrorlist:" for more info
+| $EMOTE/      | not fully implemented yet, only "idle" is read
+| '- $LAYER/   | see "Layers:" for more info
+| '- '-        | anything deeper depends on the layer, see "Layers:"
++--------------+----------------------------------------------------
+
 
 Mirrorlist:
 -----------
-A simple DSL to tell the mirror script which layers (see "Layers:") should be mirrored. Each line should contain just the name of a layer to mirror. eg:
+A simple dsl to tell the mirror script which layers (see "Layers:") should be mirrored. Each line should contain just the name of a layer to mirror. eg:
 << EOF
 base
 eyebrowl
@@ -20,18 +25,21 @@ eyebrowr
 EOF
 The mirror script will take all the left side angles, reverse them, and use them as the right side angles. As such, it WILL overwrite any right side angles. Make sure anything you put in this file should actually be fully symmetrical!
 
+
 Layers:
 -------
-TODO: allow for extra layers to be inserted
-Layers with special handling:
-NAME       DRAW ORDER
-- base     - 0
-- eyel     - 1
-- eyer     - 2
-- eyebrowl - 3
-- eyebrowr - 4
-- mouth    - 5
-- hair     - 6
+Every defined layer to draw.
+Available layers:
+| NAME       | DRAW ORDER
++------------+-----------
+| base       | 0
+| eyel       | 1
+| eyer       | 2
+| eyebrowl   | 3
+| eyebrowr   | 4
+| mouth      | 5
+| hair       | 6
++------------+-----------
 TODO: "Layers:" is unfinished
 
 
@@ -151,7 +159,7 @@ state { (closed is required)
 	openTongue
 }
 
-format:
+FORMAT:
 	/config:
 		line1: row offset (for all files)
 		line2: column offset (for all files)
@@ -161,16 +169,7 @@ format:
 	/LAYERNUMBER:
 		line1: fg color (7 for default)
 		line2: bg color (0 for default)
-		line3: mode / attribute (
-			0:normal
-			1:bold
-			2:faint
-			3:italic
-			4:underline
-			5:blink (didn't know this was a thing, it's cool though)
-			7:swap fg/bg (probably useless)
-			9:strike
-		)
+		line3: text attributes (see https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters for the list of available attributes, attributes can be combined by separating them with semicolons, eg: 2;4)
 		line4: filmreel frame time } see FILMREEL for more info
 		line5: filmreel mode       }
 		rest: ascii art

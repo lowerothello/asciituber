@@ -2,8 +2,6 @@
 
 - drawblock
 |
-|- XYWH are a bit broken, W doesn't account for X offset properly
-|
 |- glitch effects (more motion to feel less stationary, and to lean into the aesthetic)
 |'- chrommatic abberation type beat (layers drifting independantly)
 |'- cell colour invert triggerred by noise

@@ -18,6 +18,7 @@ BLINKFULL=10
 # set this to the desired frametime (in seconds)
 DELAY=0.05
 
+MODEL="$1"
 
 # check requirements are present
 which oscdump >/dev/null || {
@@ -55,7 +56,7 @@ initangles "$1" 'base'
 	do
 		# update state
 		eval $(cat "$tmpfile")
-		draw "$1"
+		draw
 		sleep $DELAY
 	done
 ) &

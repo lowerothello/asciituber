@@ -7,8 +7,7 @@
 # - $DELAY - the time in seconds to wait between draws, the frametime
 
 show() { # dumb way to draw an angle
-	baseAngle="$1" draw "$MODEL" "$FRAME"
-	# printf '\033[H%s' "$FRAME"
+	baseAngle="$1" draw "$FRAME"
 	sleep $DELAY
 	FRAME="$((FRAME+1))"
 }
