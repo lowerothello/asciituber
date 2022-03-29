@@ -13,8 +13,8 @@ export RBLINK=0
 export AUTO= # 1
 export X=1 # 1
 export Y=0 # 0
-export W=100 # 80
-export H=48 # 24
+export W=$(tput cols) # 80
+export H=$(($(tput lines) - 1)) # 24
 
 # internal definitions
 # mod offset, offsets the puppet

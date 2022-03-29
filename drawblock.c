@@ -100,21 +100,21 @@ void drawlayer (struct state) {
 			if (s.filmheight > 0 && drawnlines > s.filmheight) break;
 
 			// set text formatting opts
-			printf("\033[%dm\033[38;5;%dm\033[48;5;%dm", attr, fg, bg);
+			printf("\033[%d;3%d;4%dm", attr, fg, bg);
 			// draw the block
 			for (i = 0; i < strlen(s.buffer); i++) {
 				if (xpos + i > s.X && xpos + i < s.X + s.W) {
 					if (s.buffer[i] != ' ') {
 						if (s.invertlayer && s.invertbuffer[i] && s.invertbuffer[i] != ' ') {
-							printf("\033[38;5;%dm\033[48;5;%dm", bg, fg);
+							printf("\033[%d;3%d;4%dm", attr, bg, fg);
 							printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
-							printf("\033[38;5;%dm\033[48;5;%dm", fg, bg);
+							printf("\033[%d;3%d;4%dm", attr, fg, bg);
 						} else printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
 					}
 				}
 			}
 			// unset text formatting opt
-			printf("\033[m");
+			printf("\033[0m");
 		}
 		lineno++;
 	}
