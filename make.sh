@@ -1,3 +1,3 @@
 #!/bin/sh
 
-${CC:-gcc} drawblock.c -o drawblock
+${CC:-gcc} $CFLAGS drawblock.c -o drawblock
