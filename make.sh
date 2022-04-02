@@ -1,3 +1,8 @@
 #!/bin/sh
 
-${CC:-gcc} $CFLAGS drawblock.c -o drawblock
+run() {
+	echo "$@"
+	$@
+}
+
+run ${CC:-gcc} $CFLAGS drawblock.c -o drawblock

@@ -85,7 +85,7 @@ void drawlayer (struct state) {
 
 	int drawnlines = 0;
 	int processedlines = 0;
-	int i;
+	size_t x;
 	while (fgets(s.buffer, STR_LEN, layer)) {
 		if (s.invertlayer) fgets(s.invertbuffer, STR_LEN, s.invertlayer);
 
@@ -102,15 +102,13 @@ void drawlayer (struct state) {
 			// set text formatting opts
 			printf("\033[%s;3%d;4%dm", attr, fg, bg);
 			// draw the block
-			for (i = 0; i < strlen(s.buffer); i++) {
-				if (xpos + i > s.X && xpos + i < s.X + s.W) {
-					if (s.buffer[i] != ' ') {
-						if (s.invertlayer && s.invertbuffer[i] && s.invertbuffer[i] != ' ') {
-							printf("\033[%s;7;3%d;4%dm", attr, fg, bg); /* add the invert attribute */
-							printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
-							printf("\033[%s;3%d;4%dm", attr, fg, bg); /* remove the invert attribute */
-						} else printf("\033[%d;%dH%c", lineno, xpos + i, s.buffer[i]);
-					}
+			for (x = 0; x < strlen(s.buffer); x++) {
+				if (s.buffer[x] != ' ') {
+					if (s.invertlayer && s.invertbuffer[x] && s.invertbuffer[x] != ' ') {
+						printf("\033[%s;7;3%d;4%dm", attr, fg, bg); /* add the invert attribute */
+						printf("\033[%d;%dH%c", lineno, xpos + x, s.buffer[x]);
+						printf("\033[%s;3%d;4%dm", attr, fg, bg); /* remove the invert attribute */
+					} else printf("\033[%d;%dH%c", lineno, xpos + x, s.buffer[x]);
 				}
 			}
 			// unset text formatting opt
